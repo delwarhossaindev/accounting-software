@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Windows/Fonts/**)",
+      "Read(//c/Users/delwar/AppData/Local/Microsoft/Windows/**)",
+      "Read(//c/Users/delwar/Downloads/**)",
+      "Read(//c/Users/delwar/Desktop/**)"
+    ]
+  }
+}
