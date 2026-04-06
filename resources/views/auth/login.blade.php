@@ -17,6 +17,13 @@
         <div class="card-body">
             <p class="login-box-msg">Sign in to start your session</p>
 
+            <div class="alert alert-info" style="font-size: 13px;">
+                <strong><i class="fas fa-info-circle mr-1"></i> Demo Credentials</strong>
+                <hr class="my-2">
+                <div><i class="fas fa-envelope mr-1"></i> <strong>Email:</strong> admin@admin.com</div>
+                <div><i class="fas fa-lock mr-1"></i> <strong>Password:</strong> password</div>
+            </div>
+
             @if(session('status'))
                 <div class="alert alert-success alert-dismissible fade show">
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
