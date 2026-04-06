@@ -82,6 +82,13 @@
                     </li>
 
                     <li class="nav-item">
+                        <a href="{{ route('account-groups.index') }}" class="nav-link {{ request()->routeIs('account-groups.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-layer-group"></i>
+                            <p>Account Groups</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
                         <a href="{{ route('journals.index') }}" class="nav-link {{ request()->routeIs('journals.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-book"></i>
                             <p>Journal Entries</p>

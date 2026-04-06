@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AccountGroupController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
@@ -27,6 +28,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Chart of Accounts
     Route::resource('accounts', AccountController::class)->except(['show']);
     Route::get('accounts/{account}/ledger', [AccountController::class, 'ledger'])->name('accounts.ledger');
+
+    // Account Groups
+    Route::resource('account-groups', AccountGroupController::class)->except(['show']);
 
     // Journal Entries
     Route::resource('journals', JournalEntryController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
