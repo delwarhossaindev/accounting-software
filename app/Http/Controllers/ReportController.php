@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\JournalEntryItem;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -118,5 +121,97 @@ class ReportController extends Controller
         return view('reports.balance-sheet', compact(
             'assets', 'liabilities', 'equity', 'totalAssets', 'totalLiabilities', 'totalEquity', 'date'
         ));
+    }
+
+    public function agedReceivables(Request $request)
+    {
+        $asOfDate = $request->get('as_of_date', now()->format('Y-m-d'));
+
+        $customers = Customer::with(['invoices' => function ($q) use ($asOfDate) {
+            $q->where('type', 'sales')
+              ->where('date', '<=', $asOfDate)
+              ->whereIn('status', ['sent', 'partial', 'overdue', 'paid'])
+              ->where('due', '>', 0);
+        }])->get();
+
+        $report = $customers->map(function ($customer) use ($asOfDate) {
+            $buckets = ['current' => 0, '1_30' => 0, '31_60' => 0, '61_90' => 0, 'over_90' => 0];
+
+            foreach ($customer->invoices as $invoice) {
+                $dueDate = $invoice->due_date ?? $invoice->date;
+                $daysPast = \Carbon\Carbon::parse($dueDate)->diffInDays(\Carbon\Carbon::parse($asOfDate), false);
+
+                if ($daysPast <= 0) $buckets['current'] += $invoice->due;
+                elseif ($daysPast <= 30) $buckets['1_30'] += $invoice->due;
+                elseif ($daysPast <= 60) $buckets['31_60'] += $invoice->due;
+                elseif ($daysPast <= 90) $buckets['61_90'] += $invoice->due;
+                else $buckets['over_90'] += $invoice->due;
+            }
+
+            $total = array_sum($buckets);
+
+            return [
+                'customer' => $customer,
+                'buckets' => $buckets,
+                'total' => $total,
+            ];
+        })->filter(fn($r) => $r['total'] > 0)->values();
+
+        $totals = [
+            'current' => $report->sum(fn($r) => $r['buckets']['current']),
+            '1_30' => $report->sum(fn($r) => $r['buckets']['1_30']),
+            '31_60' => $report->sum(fn($r) => $r['buckets']['31_60']),
+            '61_90' => $report->sum(fn($r) => $r['buckets']['61_90']),
+            'over_90' => $report->sum(fn($r) => $r['buckets']['over_90']),
+            'total' => $report->sum('total'),
+        ];
+
+        return view('reports.aged-receivables', compact('report', 'totals', 'asOfDate'));
+    }
+
+    public function agedPayables(Request $request)
+    {
+        $asOfDate = $request->get('as_of_date', now()->format('Y-m-d'));
+
+        $suppliers = Supplier::with(['invoices' => function ($q) use ($asOfDate) {
+            $q->where('type', 'purchase')
+              ->where('date', '<=', $asOfDate)
+              ->whereIn('status', ['sent', 'partial', 'overdue', 'paid'])
+              ->where('due', '>', 0);
+        }])->get();
+
+        $report = $suppliers->map(function ($supplier) use ($asOfDate) {
+            $buckets = ['current' => 0, '1_30' => 0, '31_60' => 0, '61_90' => 0, 'over_90' => 0];
+
+            foreach ($supplier->invoices as $invoice) {
+                $dueDate = $invoice->due_date ?? $invoice->date;
+                $daysPast = \Carbon\Carbon::parse($dueDate)->diffInDays(\Carbon\Carbon::parse($asOfDate), false);
+
+                if ($daysPast <= 0) $buckets['current'] += $invoice->due;
+                elseif ($daysPast <= 30) $buckets['1_30'] += $invoice->due;
+                elseif ($daysPast <= 60) $buckets['31_60'] += $invoice->due;
+                elseif ($daysPast <= 90) $buckets['61_90'] += $invoice->due;
+                else $buckets['over_90'] += $invoice->due;
+            }
+
+            $total = array_sum($buckets);
+
+            return [
+                'supplier' => $supplier,
+                'buckets' => $buckets,
+                'total' => $total,
+            ];
+        })->filter(fn($r) => $r['total'] > 0)->values();
+
+        $totals = [
+            'current' => $report->sum(fn($r) => $r['buckets']['current']),
+            '1_30' => $report->sum(fn($r) => $r['buckets']['1_30']),
+            '31_60' => $report->sum(fn($r) => $r['buckets']['31_60']),
+            '61_90' => $report->sum(fn($r) => $r['buckets']['61_90']),
+            'over_90' => $report->sum(fn($r) => $r['buckets']['over_90']),
+            'total' => $report->sum('total'),
+        ];
+
+        return view('reports.aged-payables', compact('report', 'totals', 'asOfDate'));
     }
 }

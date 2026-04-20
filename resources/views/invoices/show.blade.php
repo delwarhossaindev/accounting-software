@@ -9,6 +9,11 @@
             </div>
             <div class="col-sm-6">
                 <div class="float-sm-right">
+                    @if($invoice->type === 'sales' && $invoice->customer?->email)
+                    <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#emailModal">
+                        <i class="fas fa-envelope mr-1"></i> Email to Customer
+                    </button>
+                    @endif
                     <a href="{{ route('pdf.invoice', $invoice) }}" class="btn btn-secondary btn-sm" target="_blank">
                         <i class="fas fa-file-pdf mr-1"></i> Export PDF
                     </a>
@@ -177,4 +182,39 @@
 
     </div>
 </section>
+
+{{-- Email Modal --}}
+@if($invoice->type === 'sales' && $invoice->customer?->email)
+<div class="modal fade" id="emailModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="{{ route('invoices.email', $invoice) }}" method="POST">
+                @csrf
+                <div class="modal-header bg-success">
+                    <h5 class="modal-title text-white"><i class="fas fa-envelope mr-2"></i>Email Invoice to Customer</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Recipient Email <span class="text-danger">*</span></label>
+                        <input type="email" name="email" class="form-control" value="{{ $invoice->customer->email }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Additional Message (optional)</label>
+                        <textarea name="message" rows="4" class="form-control" placeholder="Thank you for your business...">Dear {{ $invoice->customer->name }},&#10;&#10;Please find the attached invoice for your recent purchase. Kindly process the payment by the due date.&#10;&#10;Thank you!</textarea>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Invoice details will be sent as a formatted HTML email. Draft invoices will automatically be marked as "sent".
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-paper-plane mr-1"></i> Send Email</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
 @endsection

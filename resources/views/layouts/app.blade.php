@@ -7,7 +7,7 @@
     <title>{{ config('app.name', 'Accounting Software') }}</title>
 
     <!-- Google Font -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- AdminLTE 3 -->
@@ -16,12 +16,23 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css">
+    <!-- Select2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css">
     <!-- Toastr -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <!-- Custom Theme -->
+    <link rel="stylesheet" href="{{ asset('css/theme.css') }}?v={{ time() }}">
 
     @stack('styles')
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
+
+<!-- Page Loader -->
+<div class="page-loader" id="pageLoader">
+    <div class="spinner"></div>
+</div>
+
 <div class="wrapper">
 
     <!-- Navbar -->
@@ -38,6 +49,13 @@
 
         <!-- Right -->
         <ul class="navbar-nav ml-auto">
+            <!-- Dark Mode Toggle -->
+            <li class="nav-item">
+                <a class="nav-link" href="#" id="darkModeToggle" title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </a>
+            </li>
+
             <!-- Language Switcher -->
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
@@ -113,7 +131,37 @@
                         </a>
                     </li>
 
+                    <li class="nav-item">
+                        <a href="{{ route('tax-rates.index') }}" class="nav-link {{ request()->routeIs('tax-rates.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-percent"></i>
+                            <p>{{ __('messages.tax_rates') }}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-header">{{ __('messages.inventory') }}</li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-boxes"></i>
+                            <p>{{ __('messages.products') }}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('products.stock-report') }}" class="nav-link {{ request()->routeIs('products.stock-report') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-warehouse"></i>
+                            <p>{{ __('messages.stock_report') }}</p>
+                        </a>
+                    </li>
+
                     <li class="nav-header">{{ __('messages.sales_purchase') }}</li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('quotations.index') }}" class="nav-link {{ request()->routeIs('quotations.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-file-signature"></i>
+                            <p>{{ __('messages.quotations') }}</p>
+                        </a>
+                    </li>
 
                     <li class="nav-item">
                         <a href="{{ route('invoices.index', ['type' => 'sales']) }}" class="nav-link {{ request()->routeIs('invoices.*') && request('type') == 'sales' ? 'active' : '' }}">
@@ -126,6 +174,20 @@
                         <a href="{{ route('invoices.index', ['type' => 'purchase']) }}" class="nav-link {{ request()->routeIs('invoices.*') && request('type') == 'purchase' ? 'active' : '' }}">
                             <i class="nav-icon fas fa-shopping-cart"></i>
                             <p>{{ __('messages.purchase_bills') }}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('credit-debit-notes.index', ['type' => 'credit']) }}" class="nav-link {{ request()->routeIs('credit-debit-notes.*') && request('type') != 'debit' ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-undo"></i>
+                            <p>{{ __('messages.credit_notes') }}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('credit-debit-notes.index', ['type' => 'debit']) }}" class="nav-link {{ request()->routeIs('credit-debit-notes.*') && request('type') == 'debit' ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-redo"></i>
+                            <p>{{ __('messages.debit_notes') }}</p>
                         </a>
                     </li>
 
@@ -188,6 +250,43 @@
                         <a href="{{ route('reports.balance-sheet') }}" class="nav-link {{ request()->routeIs('reports.balance-sheet') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-chart-pie"></i>
                             <p>{{ __('messages.balance_sheet') }}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('reports.aged-receivables') }}" class="nav-link {{ request()->routeIs('reports.aged-receivables') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-hourglass-half"></i>
+                            <p>{{ __('messages.aged_receivables') }}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('reports.aged-payables') }}" class="nav-link {{ request()->routeIs('reports.aged-payables') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-hourglass-end"></i>
+                            <p>{{ __('messages.aged_payables') }}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('audit-logs.index') }}" class="nav-link {{ request()->routeIs('audit-logs.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-clipboard-list"></i>
+                            <p>{{ __('messages.audit_log') }}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-header">{{ __('messages.company') }}</li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('company-settings.edit') }}" class="nav-link {{ request()->routeIs('company-settings.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-building"></i>
+                            <p>{{ __('messages.company_settings') }}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('branches.index') }}" class="nav-link {{ request()->routeIs('branches.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-store"></i>
+                            <p>{{ __('messages.branches') }}</p>
                         </a>
                     </li>
 
@@ -268,8 +367,50 @@
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<!-- Select2 -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <!-- Toastr -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script>
+    // Auto-initialize Select2 for all select elements (except with .no-select2 class)
+    $(function() {
+        $('select:not(.no-select2)').select2({
+            theme: 'bootstrap4',
+            width: '100%'
+        });
+    });
+
+    // Dark Mode Toggle
+    $(function() {
+        const body = document.body;
+        const toggle = document.getElementById('darkModeToggle');
+        const icon = toggle ? toggle.querySelector('i') : null;
+
+        const setTheme = (isDark) => {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                if (icon) { icon.classList.remove('fa-moon'); icon.classList.add('fa-sun'); }
+            } else {
+                body.classList.remove('dark-mode');
+                if (icon) { icon.classList.remove('fa-sun'); icon.classList.add('fa-moon'); }
+            }
+        };
+
+        // Load saved preference
+        const savedDark = localStorage.getItem('darkMode') === 'true';
+        setTheme(savedDark);
+
+        if (toggle) {
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const isDark = !body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isDark);
+                setTheme(isDark);
+            });
+        }
+    });
+</script>
 
 <script>
     toastr.options = {

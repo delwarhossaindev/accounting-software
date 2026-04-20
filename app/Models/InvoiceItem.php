@@ -9,7 +9,7 @@ class InvoiceItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['invoice_id', 'description', 'quantity', 'unit_price', 'amount', 'account_id'];
+    protected $fillable = ['invoice_id', 'product_id', 'description', 'serial_no', 'warranty', 'quantity', 'unit_price', 'amount', 'account_id'];
 
     public function invoice()
     {
@@ -19,5 +19,10 @@ class InvoiceItem extends Model
     public function account()
     {
         return $this->belongsTo(Account::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
     }
 }

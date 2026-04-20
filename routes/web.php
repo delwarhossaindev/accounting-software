@@ -2,6 +2,10 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AccountGroupController;
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\BranchController;
+use App\Http\Controllers\CompanySettingController;
+use App\Http\Controllers\CreditDebitNoteController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
@@ -9,12 +13,15 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\JournalEntryController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PdfController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Settings\PermissionController;
 use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\UserController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\TaxRateController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -49,7 +56,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('suppliers', SupplierController::class)->except(['show']);
 
     // Invoices (Sales & Purchase)
+    Route::post('invoices/{invoice}/email', [InvoiceController::class, 'sendEmail'])->name('invoices.email');
     Route::resource('invoices', InvoiceController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
+
+    // Quotations
+    Route::post('quotations/{quotation}/convert', [QuotationController::class, 'convertToInvoice'])->name('quotations.convert');
+    Route::post('quotations/{quotation}/status', [QuotationController::class, 'updateStatus'])->name('quotations.status');
+    Route::resource('quotations', QuotationController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
+
+    // Credit & Debit Notes
+    Route::resource('credit-debit-notes', CreditDebitNoteController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
 
     // Payments
     Route::resource('payments', PaymentController::class)->only(['index', 'create', 'store', 'destroy']);
@@ -57,10 +73,32 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Expenses
     Route::resource('expenses', ExpenseController::class)->except(['show']);
 
+    // Products & Inventory
+    Route::get('products/stock-report', [ProductController::class, 'stockReport'])->name('products.stock-report');
+    Route::get('products/{product}/movements', [ProductController::class, 'movements'])->name('products.movements');
+    Route::post('products/{product}/adjust-stock', [ProductController::class, 'adjustStock'])->name('products.adjust-stock');
+    Route::resource('products', ProductController::class)->except(['show']);
+
+    // Tax Rates
+    Route::resource('tax-rates', TaxRateController::class)->except(['show']);
+
+    // Audit Logs
+    Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+    Route::get('audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');
+
+    // Company Settings
+    Route::get('company-settings', [CompanySettingController::class, 'edit'])->name('company-settings.edit');
+    Route::put('company-settings', [CompanySettingController::class, 'update'])->name('company-settings.update');
+
+    // Branches
+    Route::resource('branches', BranchController::class)->except(['show']);
+
     // Reports
     Route::get('reports/trial-balance', [ReportController::class, 'trialBalance'])->name('reports.trial-balance');
     Route::get('reports/income-statement', [ReportController::class, 'incomeStatement'])->name('reports.income-statement');
     Route::get('reports/balance-sheet', [ReportController::class, 'balanceSheet'])->name('reports.balance-sheet');
+    Route::get('reports/aged-receivables', [ReportController::class, 'agedReceivables'])->name('reports.aged-receivables');
+    Route::get('reports/aged-payables', [ReportController::class, 'agedPayables'])->name('reports.aged-payables');
 
     // PDF Export
     Route::get('pdf/invoice/{invoice}', [PdfController::class, 'invoice'])->name('pdf.invoice');

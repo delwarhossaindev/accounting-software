@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     protected $fillable = [
         'invoice_no', 'type', 'date', 'due_date', 'customer_id', 'supplier_id',
+        'branch_id', 'po_no', 'req_no', 'sold_by',
         'subtotal', 'tax', 'discount', 'total', 'paid', 'due', 'status', 'notes', 'user_id'
     ];
 
@@ -27,6 +29,11 @@ class Invoice extends Model
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
     }
 
     public function items()

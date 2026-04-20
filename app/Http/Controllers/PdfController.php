@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Models\Branch;
+use App\Models\CompanySetting;
 use App\Models\Customer;
 use App\Models\Expense;
 use App\Models\Invoice;
@@ -76,56 +78,12 @@ class PdfController extends Controller
     // ========== Invoice PDF ==========
     public function invoice(Invoice $invoice)
     {
-        $invoice->load('items', 'customer', 'supplier', 'payments');
+        $invoice->load('items.product', 'customer', 'supplier', 'branch', 'payments');
+        $company = CompanySetting::current();
+        $branches = Branch::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
         $mpdf = $this->createPdf('Invoice - ' . $invoice->invoice_no);
 
-        $party = $invoice->type == 'sales'
-            ? ($invoice->customer->name ?? '-')
-            : ($invoice->supplier->name ?? '-');
-        $partyLabel = $invoice->type == 'sales' ? 'Customer' : 'Supplier';
-
-        $html = $this->headerHtml($invoice->invoice_no, ucfirst($invoice->type) . ' Invoice');
-
-        // Info section
-        $html .= '<table width="100%" cellpadding="4"><tr>';
-        $html .= '<td style="font-size: 10px;"><strong>' . $partyLabel . ':</strong> ' . $party . '</td>';
-        $html .= '<td style="font-size: 10px;"><strong>Date:</strong> ' . $invoice->date->format('d M Y') . '</td>';
-        $html .= '<td style="font-size: 10px;"><strong>Due Date:</strong> ' . ($invoice->due_date ? $invoice->due_date->format('d M Y') : '-') . '</td>';
-        $html .= '<td style="font-size: 10px; text-align: right;"><strong>Status:</strong> ' . ucfirst($invoice->status) . '</td>';
-        $html .= '</tr></table><br>';
-
-        // Items table
-        $html .= '<table ' . $this->tableStyle() . '>';
-        $html .= '<tr>';
-        $html .= '<th ' . $this->thStyle() . ' width="45%">Description</th>';
-        $html .= '<th ' . $this->thStyle('center') . ' width="15%">Qty</th>';
-        $html .= '<th ' . $this->thStyle('right') . ' width="20%">Unit Price</th>';
-        $html .= '<th ' . $this->thStyle('right') . ' width="20%">Amount</th>';
-        $html .= '</tr>';
-
-        foreach ($invoice->items as $item) {
-            $html .= '<tr>';
-            $html .= '<td ' . $this->tdStyle() . '>' . $item->description . '</td>';
-            $html .= '<td ' . $this->tdStyle('center') . '>' . $item->quantity . '</td>';
-            $html .= '<td ' . $this->tdStyle('right') . '>' . number_format($item->unit_price, 2) . '</td>';
-            $html .= '<td ' . $this->tdStyle('right') . '>' . number_format($item->amount, 2) . '</td>';
-            $html .= '</tr>';
-        }
-        $html .= '</table><br>';
-
-        // Summary
-        $html .= '<table width="50%" style="margin-left: auto; border: 1px solid #dee2e6;" cellpadding="4">';
-        $html .= '<tr><td style="font-size: 10px;">Subtotal</td><td style="text-align: right; font-size: 10px;">' . number_format($invoice->subtotal, 2) . '</td></tr>';
-        if ($invoice->tax > 0) {
-            $html .= '<tr><td style="font-size: 10px;">Tax</td><td style="text-align: right; font-size: 10px;">' . number_format($invoice->tax, 2) . '</td></tr>';
-        }
-        if ($invoice->discount > 0) {
-            $html .= '<tr><td style="font-size: 10px;">Discount</td><td style="text-align: right; font-size: 10px; color: red;">-' . number_format($invoice->discount, 2) . '</td></tr>';
-        }
-        $html .= '<tr style="background-color: #f8f9fa;"><td style="font-size: 11px; font-weight: bold;">Total</td><td style="text-align: right; font-size: 11px; font-weight: bold;">' . number_format($invoice->total, 2) . '</td></tr>';
-        $html .= '<tr><td style="font-size: 10px;">Paid</td><td style="text-align: right; font-size: 10px; color: green;">' . number_format($invoice->paid, 2) . '</td></tr>';
-        $html .= '<tr style="background-color: #343a40;"><td style="font-size: 11px; font-weight: bold; color: white;">Amount Due</td><td style="text-align: right; font-size: 11px; font-weight: bold; color: white;">' . number_format($invoice->due, 2) . '</td></tr>';
-        $html .= '</table>';
+        $html = view('pdf.invoice', compact('invoice', 'company', 'branches'))->render();
 
         $mpdf->WriteHTML($html);
         return response($mpdf->Output($invoice->invoice_no . '.pdf', 'S'), 200, [

@@ -5,9 +5,9 @@
 <h1 align="center">💰 অ্যাকাউন্টিং সফটওয়্যার</h1>
 
 <p align="center">
-  একটি পূর্ণাঙ্গ ডাবল-এন্ট্রি অ্যাকাউন্টিং অ্যাপ্লিকেশন যা <strong>Laravel 10</strong>, <strong>AdminLTE 3</strong>, এবং <strong>Spatie Laravel Permission</strong> দিয়ে তৈরি।
+  একটি পূর্ণাঙ্গ <strong>ডাবল-এন্ট্রি অ্যাকাউন্টিং + ইনভেন্টরি + ইনভয়েসিং</strong> অ্যাপ্লিকেশন যা <strong>Laravel 10</strong>, <strong>AdminLTE 3</strong> এবং <strong>Spatie Laravel Permission</strong> দিয়ে তৈরি।
   <br/>
-  আপনার চার্ট অফ অ্যাকাউন্টস, জার্নাল এন্ট্রি, ইনভয়েস, পেমেন্ট, খরচ এবং আর্থিক প্রতিবেদন — সবকিছু একটি পরিষ্কার, রেসপনসিভ ড্যাশবোর্ড থেকে পরিচালনা করুন।
+  Small & Medium Business (SME) এর জন্য উপযুক্ত — Quotation থেকে শুরু করে Invoice, Stock, Return, Reports, PDF সবকিছু এক জায়গায়।
 </p>
 
 <p align="center">
@@ -16,6 +16,7 @@
   <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL"/>
   <img src="https://img.shields.io/badge/AdminLTE-3-007bff?style=for-the-badge" alt="AdminLTE 3"/>
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License"/>
+  <img src="https://img.shields.io/badge/i18n-EN%2FBN-ff69b4?style=for-the-badge" alt="Bilingual"/>
 </p>
 
 ---
@@ -27,458 +28,356 @@
 - [📋 প্রয়োজনীয়তা](#-প্রয়োজনীয়তা)
 - [🚀 ইনস্টলেশন](#-ইনস্টলেশন)
 - [⚙️ কনফিগারেশন](#️-কনফিগারেশন)
-- [📖 ব্যবহার নির্দেশিকা](#-ব্যবহার-নির্দেশিকা)
-  - [📊 ড্যাশবোর্ড](#-ড্যাশবোর্ড)
-  - [📒 চার্ট অফ অ্যাকাউন্টস](#-চার্ট-অফ-অ্যাকাউন্টস)
-  - [🗂️ অ্যাকাউন্ট গ্রুপ](#️-অ্যাকাউন্ট-গ্রুপ)
-  - [📝 জার্নাল এন্ট্রি](#-জার্নাল-এন্ট্রি)
-  - [👥 কাস্টমার ও সাপ্লায়ার](#-কাস্টমার-ও-সাপ্লায়ার)
-  - [🧾 ইনভয়েস](#-ইনভয়েস-সেলস--পারচেজ)
-  - [💳 পেমেন্ট](#-পেমেন্ট)
-  - [💸 খরচ](#-খরচ)
-  - [📈 রিপোর্ট](#-রিপোর্ট)
-  - [🖨️ PDF এক্সপোর্ট](#️-pdf-এক্সপোর্ট)
-  - [🔐 ইউজার ও রোল ম্যানেজমেন্ট](#-ইউজার-ও-রোল-ম্যানেজমেন্ট)
-- [🔌 API রেফারেন্স](#-api-রেফারেন্স)
+- [🔑 ডিফল্ট লগইন](#-ডিফল্ট-লগইন)
+- [📖 মডিউলসমূহ](#-মডিউলসমূহ)
 - [🗄️ ডাটাবেস স্কিমা](#️-ডাটাবেস-স্কিমা)
+- [🌐 Bilingual সাপোর্ট](#-bilingual-সাপোর্ট)
+- [🎨 UI ফিচার](#-ui-ফিচার)
+- [📧 ইমেইল সেটআপ](#-ইমেইল-সেটআপ)
 - [📄 লাইসেন্স](#-লাইসেন্স)
 
 ---
 
 ## ✨ বৈশিষ্ট্যসমূহ
 
+### 📚 Core Accounting
 | বৈশিষ্ট্য | বর্ণনা |
 |---------|-------------|
-| 📚 **ডাবল-এন্ট্রি বুককিপিং** | প্রতিটি লেনদেনে ব্যালেন্সড ডেবিট ও ক্রেডিট রেকর্ড হয় |
-| 📒 **চার্ট অফ অ্যাকাউন্টস** | হায়ারার্কিক্যাল অ্যাকাউন্ট গ্রুপ — সম্পদ, দায়, মূলধন, আয়, ব্যয় |
-| 📝 **জার্নাল এন্ট্রি** | একাধিক ভাউচার টাইপ: Journal, Receipt, Payment, Contra, Sales, Purchase |
-| 🧾 **সেলস ও পারচেজ ইনভয়েস** | লাইন-আইটেম ইনভয়েস, ট্যাক্স, ডিসকাউন্ট ও পেমেন্ট ট্র্যাকিং সহ |
-| 👥 **কাস্টমার ও সাপ্লায়ার ম্যানেজমেন্ট** | যোগাযোগের বিবরণ, ওপেনিং ব্যালেন্স এবং বকেয়া ট্র্যাকিং |
-| 💳 **পেমেন্ট** | কাস্টমার থেকে প্রাপ্তি এবং সাপ্লায়ারকে পেমেন্ট রেকর্ড করুন |
-| 💸 **খরচ ট্র্যাকিং** | ব্যবসায়িক খরচ শ্রেণীবদ্ধ ও রেকর্ড করুন |
-| 📈 **আর্থিক রিপোর্ট** | ট্রায়াল ব্যালেন্স, ইনকাম স্টেটমেন্ট, ব্যালেন্স শিট |
-| 🖨️ **PDF এক্সপোর্ট** | ইনভয়েস, রিপোর্ট এবং তালিকার PDF তৈরি করুন (বাংলা ফন্ট সাপোর্ট সহ) |
-| 🔐 **রোল-ভিত্তিক অ্যাক্সেস কন্ট্রোল** | ইউজার, রোল এবং বিস্তারিত পারমিশন পরিচালনা করুন |
-| 📊 **রেসপনসিভ ড্যাশবোর্ড** | রিয়েল-টাইম KPI, চার্ট, সাম্প্রতিক কার্যকলাপ এবং ওভারডিউ সতর্কতা |
-| ✉️ **ইমেইল ভেরিফিকেশন** | ইমেইল ভেরিফিকেশন সহ নিরাপদ ইউজার রেজিস্ট্রেশন |
+| 📒 **Chart of Accounts** | অ্যাকাউন্ট + হায়ারার্কিক্যাল Account Groups |
+| 📝 **Journal Entries** | ডাবল-এন্ট্রি, ৬টি voucher type (Journal, Receipt, Payment, Contra, Sales, Purchase) |
+| 👥 **Customers & Suppliers** | Opening balance, দায়/প্রাপ্য auto-calculate |
+| 🧾 **Sales & Purchase Invoices** | Multi-item, tax, discount, payment tracking সহ |
+| 💳 **Payments** | Customer received + Supplier paid |
+| 💸 **Expenses** | Categorized business expenses |
+| 🧾 **Tax Rates (VAT/GST)** | Multiple rates, default rate, auto-calculation in invoice |
+
+### 📦 Inventory & Sales Operations
+| বৈশিষ্ট্য | বর্ণনা |
+|---------|-------------|
+| 📦 **Product Management** | SKU, purchase/sale price, stock, reorder level, category |
+| 📊 **Stock Movements** | সব in/out history — invoice, adjustment, return |
+| 🔗 **Auto Stock Control** | Sales → stock reduce, Purchase → stock increase |
+| 📋 **Quotations** | Full CRUD + **one-click Convert to Invoice** |
+| 🔄 **Credit / Debit Notes** | Sales/Purchase return with auto stock reversal |
+
+### 🏢 Company & Branches
+| বৈশিষ্ট্য | বর্ণনা |
+|---------|-------------|
+| 🏢 **Company Settings** | Logo, address, TIN, BIN, currency, fiscal year, footer |
+| 🏬 **Multi-Branches** | Head Office + multiple branches, per-invoice branch tagging |
+| 📄 **Professional Invoice PDF** | JM International style — logo, branches, serial no, warranty, amount-in-words |
+
+### 📈 Financial Reports
+| বৈশিষ্ট্য | বর্ণনা |
+|---------|-------------|
+| ⚖️ **Trial Balance** | As-of-date filter |
+| 📊 **Income Statement** | Date range P&L |
+| 🏦 **Balance Sheet** | Assets, Liabilities, Equity snapshot |
+| ⏳ **Aged Receivables** | Current / 1-30 / 31-60 / 61-90 / 90+ buckets |
+| ⏳ **Aged Payables** | Same bucket breakdown for suppliers |
+| 🖨️ **PDF Export** | সব report PDF export সহ Bengali font সাপোর্ট |
+
+### 🔐 Security & Administration
+| বৈশিষ্ট্য | বর্ণনা |
+|---------|-------------|
+| 🔐 **User/Role/Permission** | Spatie Laravel Permission — granular RBAC |
+| 💾 **Audit Log** | প্রতিটি Create/Update/Delete track — user, IP, old vs new JSON |
+| 📧 **Email Invoice** | কাস্টমারকে সরাসরি HTML invoice পাঠান |
+| 🔑 **Default Roles** | Admin / Accountant / Viewer |
+
+### 🎨 UX
+| বৈশিষ্ট্য | বর্ণনা |
+|---------|-------------|
+| 🌙 **Dark / Light Mode** | Navbar toggle, localStorage সেভ |
+| 🌐 **Bilingual** | English + বাংলা (instant switch) |
+| 🔔 **Toast Notifications** | Success/error/warning — Toastr |
+| ✨ **Modern Glassmorphism Login** | Gradient background + animated shapes |
+| 🎯 **Select2 Dropdowns** | সবখানে searchable |
 
 ---
 
 ## 🛠️ প্রযুক্তি
 
-| স্তর | প্রযুক্তি | ব্যাজ |
-|-------|-----------|-------|
-| 🔧 ব্যাকএন্ড | Laravel 10, PHP 8.1+ | ![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=flat-square&logo=laravel&logoColor=white) ![PHP](https://img.shields.io/badge/PHP-777BB4?style=flat-square&logo=php&logoColor=white) |
-| 🎨 ফ্রন্টএন্ড | Blade, AdminLTE 3, Bootstrap 4, Alpine.js | ![Bootstrap](https://img.shields.io/badge/Bootstrap-7952B3?style=flat-square&logo=bootstrap&logoColor=white) ![Alpine.js](https://img.shields.io/badge/Alpine.js-8BC0D0?style=flat-square&logo=alpine.js&logoColor=black) |
-| 🗄️ ডাটাবেস | MySQL / MariaDB | ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white) |
-| 🔒 অথেনটিকেশন | Laravel Breeze, Laravel Sanctum | ![Sanctum](https://img.shields.io/badge/Sanctum-FF2D20?style=flat-square&logo=laravel&logoColor=white) |
-| 🛡️ RBAC | Spatie Laravel Permission | ![Spatie](https://img.shields.io/badge/Spatie-197593?style=flat-square) |
-| 📄 PDF | mPDF 8.3, TCPDF 6.11 | ![PDF](https://img.shields.io/badge/mPDF-CC0000?style=flat-square) |
-| ⚡ বিল্ড টুল | Vite 5 | ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white) |
+| স্তর | প্রযুক্তি |
+|-------|-----------|
+| 🔧 Backend | Laravel 10, PHP 8.1+ |
+| 🎨 Frontend | Blade, AdminLTE 3, Bootstrap 4, Alpine.js |
+| 🗄️ Database | MySQL / MariaDB |
+| 🔒 Auth | Laravel Breeze, Laravel Sanctum |
+| 🛡️ RBAC | Spatie Laravel Permission |
+| 📄 PDF | mPDF 8.3, TCPDF 6.11 (Bengali font support) |
+| 📧 Mail | Laravel Mail (SMTP) |
+| ⚡ Build | Vite 5 |
+| 🎯 Extras | Select2, Toastr, ApexCharts, DataTables |
 
 ---
 
 ## 📋 প্রয়োজনীয়তা
 
-| প্রয়োজনীয়তা | সংস্করণ |
-|-------------|---------|
-| 🐘 PHP | >= 8.1 |
-| 📦 Composer | সর্বশেষ |
-| 🐬 MySQL | 5.7+ বা MariaDB |
-| 💚 Node.js | সর্বশেষ LTS |
-| 📦 npm | সর্বশেষ |
-| 🌐 ওয়েব সার্ভার | Apache বা Nginx (URL rewriting সক্রিয়) |
+- PHP >= 8.1
+- Composer
+- MySQL 5.7+ or MariaDB
+- Node.js & npm
+- Apache/Nginx (URL rewriting)
 
 ---
 
 ## 🚀 ইনস্টলেশন
 
 ```bash
-# ১️⃣ রিপোজিটরি ক্লোন করুন
+# ১. Clone
 git clone <repository-url> accounting-software
 cd accounting-software
 
-# ২️⃣ PHP নির্ভরতা ইনস্টল করুন
+# ২. Dependencies
 composer install
+npm install && npm run build
 
-# ৩️⃣ এনভায়রনমেন্ট ফাইল কপি করুন
+# ৩. Environment
 cp .env.example .env
-
-# ৪️⃣ অ্যাপ্লিকেশন কী জেনারেট করুন
 php artisan key:generate
 
-# ৫️⃣ MySQL ডাটাবেস তৈরি করুন
+# ৪. Database
 mysql -u root -p -e "CREATE DATABASE accounting_db"
+# .env এ DB credentials configure করুন
 
-# ৬️⃣ .env ফাইল কনফিগার করুন (কনফিগারেশন সেকশন দেখুন)
+# ৫. Migrate + Seed (Admin user, permissions, default accounts)
+php artisan migrate --seed
 
-# ৭️⃣ ডাটাবেস মাইগ্রেশন চালান
-php artisan migrate
+# ৬. Storage link (logo upload এর জন্য)
+php artisan storage:link
 
-# ৮️⃣ ফ্রন্টএন্ড ডিপেন্ডেন্সি ইনস্টল ও বিল্ড করুন
-npm install
-npm run build
-
-# ৯️⃣ ডেভেলপমেন্ট সার্ভার চালু করুন
+# ৭. Run
 php artisan serve
 ```
 
-🌐 অ্যাপ্লিকেশনটি `http://localhost:8000` এ পাওয়া যাবে
+🌐 `http://localhost:8000` এ প্রবেশ করুন
 
-> 💡 **WAMP/XAMPP ব্যবহারকারীদের জন্য:** আপনার ভার্চুয়াল হোস্টকে `public/` ডিরেক্টরিতে পয়েন্ট করুন এবং `http://localhost/accounting-software/public` এর মাধ্যমে প্রবেশ করুন।
+> 💡 **WAMP/XAMPP:** Virtual host কে `public/` directory তে point করুন।
 
 ---
 
 ## ⚙️ কনফিগারেশন
 
-`.env` ফাইলটি আপনার সেটিংস দিয়ে সম্পাদনা করুন:
+`.env` ফাইলে:
 
 ```env
 APP_NAME="Accounting Software"
 APP_URL=http://localhost:8000
+APP_LOCALE=en      # or 'bn' for Bangla default
 
-# 🗄️ ডাটাবেস
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=accounting_db
 DB_USERNAME=root
-DB_PASSWORD=your_password
+DB_PASSWORD=
 
-# ✉️ মেইল
+# ইমেইল (Invoice email পাঠানোর জন্য)
 MAIL_MAILER=smtp
-MAIL_HOST=your-smtp-host
+MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=your-email
-MAIL_PASSWORD=your-password
+MAIL_USERNAME=your@email.com
+MAIL_PASSWORD=your-app-password
+MAIL_FROM_ADDRESS="no-reply@company.com"
+MAIL_FROM_NAME="${APP_NAME}"
 ```
 
 ---
 
-## 📖 ব্যবহার নির্দেশিকা
+## 🔑 ডিফল্ট লগইন
 
-### 📊 ড্যাশবোর্ড
+Seeder চালানোর পর:
 
-লগইনের পর ড্যাশবোর্ড (`/dashboard`) একটি সম্পূর্ণ ওভারভিউ প্রদান করে:
-
-<table>
-  <tr>
-    <td>💵 <strong>নগদ ও ব্যাংক ব্যালেন্স</strong></td>
-    <td>অ্যাকাউন্ট 1001 ও 1002 থেকে বর্তমান ব্যালেন্স</td>
-  </tr>
-  <tr>
-    <td>📥 <strong>মোট প্রাপ্য</strong></td>
-    <td>কাস্টমারদের কাছে বকেয়া পরিমাণ</td>
-  </tr>
-  <tr>
-    <td>📤 <strong>মোট দেয়</strong></td>
-    <td>সাপ্লায়ারদের কাছে বকেয়া পরিমাণ</td>
-  </tr>
-  <tr>
-    <td>📊 <strong>আয় বনাম ব্যয়</strong></td>
-    <td>গত ৬ মাসের মাসিক তুলনা</td>
-  </tr>
-  <tr>
-    <td>🕐 <strong>সাম্প্রতিক লেনদেন</strong></td>
-    <td>সর্বশেষ ইনভয়েস, পেমেন্ট এবং খরচ</td>
-  </tr>
-  <tr>
-    <td>⚠️ <strong>ওভারডিউ ইনভয়েস</strong></td>
-    <td>নির্ধারিত তারিখ পার হওয়া ইনভয়েস</td>
-  </tr>
-  <tr>
-    <td>📋 <strong>ইনভয়েস স্ট্যাটাস</strong></td>
-    <td>Draft, Sent, Paid, Partial, Overdue, Cancelled</td>
-  </tr>
-  <tr>
-    <td>🏷️ <strong>শীর্ষ খরচ</strong></td>
-    <td>সর্বোচ্চ ব্যয়ের ক্যাটাগরি</td>
-  </tr>
-</table>
-
----
-
-### 📒 চার্ট অফ অ্যাকাউন্টস
-
-> `/accounts` এ আপনার জেনারেল লেজার অ্যাকাউন্টগুলো পরিচালনা করুন
-
-| অ্যাকশন | রুট | বর্ণনা |
-|--------|-------|-------------|
-| 📋 তালিকা | `GET /accounts` | ব্যালেন্স সহ সব অ্যাকাউন্ট দেখুন |
-| ➕ তৈরি | `GET /accounts/create` | নতুন অ্যাকাউন্ট যোগ করুন |
-| ✏️ সম্পাদনা | `GET /accounts/{id}/edit` | অ্যাকাউন্টের বিবরণ পরিবর্তন করুন |
-| 🗑️ মুছুন | `DELETE /accounts/{id}` | অ্যাকাউন্ট মুছে ফেলুন |
-| 📖 লেজার | `GET /accounts/{id}/ledger` | অ্যাকাউন্টের সব লেনদেন দেখুন |
-
-**📌 অ্যাকাউন্ট ফিল্ড:**
-
-| ফিল্ড | বর্ণনা |
-|-------|-------------|
-| 🔢 কোড | অনন্য অ্যাকাউন্ট কোড (যেমন: নগদের জন্য `1001`) |
-| 📛 নাম | অ্যাকাউন্টের নাম |
-| 📂 টাইপ | Asset, Liability, Equity, Income, বা Expense |
-| 🗂️ গ্রুপ | হায়ারার্কির জন্য প্যারেন্ট অ্যাকাউন্ট গ্রুপ |
-| 💰 ওপেনিং ব্যালেন্স | শুরুর ব্যালেন্স |
-| 🔘 স্ট্যাটাস | সক্রিয় বা নিষ্ক্রিয় |
-
----
-
-### 🗂️ অ্যাকাউন্ট গ্রুপ
-
-> `/account-groups` এ অ্যাকাউন্টগুলোকে হায়ারার্কিক্যাল গ্রুপে সংগঠিত করুন
-
-| অ্যাকশন | রুট | বর্ণনা |
-|--------|-------|-------------|
-| 📋 তালিকা | `GET /account-groups` | সব গ্রুপ তাদের প্যারেন্ট, সাব-গ্রুপ ও অ্যাকাউন্ট সংখ্যা সহ দেখুন |
-| ➕ তৈরি | `GET /account-groups/create` | নতুন গ্রুপ যোগ করুন |
-| ✏️ সম্পাদনা | `GET /account-groups/{id}/edit` | গ্রুপের বিবরণ পরিবর্তন করুন |
-| 🗑️ মুছুন | `DELETE /account-groups/{id}` | গ্রুপ মুছে ফেলুন |
-
-**📌 বৈশিষ্ট্য:**
-- 🌲 সেলফ-রেফারেন্সিং প্যারেন্ট-চাইল্ড হায়ারার্কি
-- 🛡️ যে গ্রুপের অ্যাকাউন্ট লিঙ্ক করা আছে সেটি মুছে ফেলা যাবে না
-- 🔄 একটি গ্রুপ নিজেই নিজের প্যারেন্ট হতে পারবে না
-
----
-
-### 📝 জার্নাল এন্ট্রি
-
-> `/journals` এ ডাবল-এন্ট্রি জার্নাল লেনদেন তৈরি করুন
-
-| অ্যাকশন | রুট | বর্ণনা |
-|--------|-------|-------------|
-| 📋 তালিকা | `GET /journals` | সব জার্নাল এন্ট্রি দেখুন |
-| ➕ তৈরি | `GET /journals/create` | নতুন জার্নাল এন্ট্রি তৈরি করুন |
-| 👁️ দেখুন | `GET /journals/{id}` | লাইন আইটেম সহ এন্ট্রির বিবরণ |
-| 🗑️ মুছুন | `DELETE /journals/{id}` | জার্নাল এন্ট্রি মুছে ফেলুন |
-
-**🏷️ ভাউচার টাইপ ও অটো-জেনারেটেড প্রিফিক্স:**
-
-| টাইপ | প্রিফিক্স | আইকন |
-|------|--------|------|
-| Journal | `JOR-` | 📓 |
-| Receipt | `REC-` | 📥 |
-| Payment | `PAY-` | 📤 |
-| Contra | `CON-` | 🔄 |
-| Sales | `SAL-` | 🛒 |
-| Purchase | `PUR-` | 📦 |
-
-> ⚠️ ভাউচার নম্বর স্বয়ংক্রিয়ভাবে তৈরি হয়। **ডেবিট অবশ্যই ক্রেডিটের সমান হতে হবে** — সিস্টেম সংরক্ষণের আগে এটি যাচাই করে।
-
----
-
-### 👥 কাস্টমার ও সাপ্লায়ার
-
-> `/customers` এবং `/suppliers` এ ব্যবসায়িক যোগাযোগ পরিচালনা করুন
-
-| অ্যাকশন | 👤 কাস্টমার রুট | 🏭 সাপ্লায়ার রুট |
-|--------|-------------------|-------------------|
-| 📋 তালিকা | `GET /customers` | `GET /suppliers` |
-| ➕ তৈরি | `GET /customers/create` | `GET /suppliers/create` |
-| ✏️ সম্পাদনা | `GET /customers/{id}/edit` | `GET /suppliers/{id}/edit` |
-| 🗑️ মুছুন | `DELETE /customers/{id}` | `DELETE /suppliers/{id}` |
-
-**📌 ফিল্ড:** নাম, ইমেইল, ফোন, ঠিকানা, ওপেনিং ব্যালেন্স, স্ট্যাটাস (সক্রিয়/নিষ্ক্রিয়)
-
-> 🔄 সিস্টেম স্বয়ংক্রিয়ভাবে প্রতিটি কাস্টমারের **মোট বকেয়া** এবং প্রতিটি সাপ্লায়ারের **মোট দেয়** গণনা করে।
-
----
-
-### 🧾 ইনভয়েস (সেলস ও পারচেজ)
-
-> `/invoices` এ ইনভয়েস তৈরি ও পরিচালনা করুন
-
-| অ্যাকশন | রুট | বর্ণনা |
-|--------|-------|-------------|
-| 📋 সেলস তালিকা | `GET /invoices?type=sales` | সব সেলস ইনভয়েস |
-| 📋 পারচেজ তালিকা | `GET /invoices?type=purchase` | সব পারচেজ বিল |
-| ➕ সেলস তৈরি | `GET /invoices/create?type=sales` | নতুন সেলস ইনভয়েস |
-| ➕ পারচেজ তৈরি | `GET /invoices/create?type=purchase` | নতুন পারচেজ বিল |
-| 👁️ দেখুন | `GET /invoices/{id}` | ইনভয়েসের বিবরণ |
-| 🗑️ মুছুন | `DELETE /invoices/{id}` | ইনভয়েস মুছে ফেলুন |
-
-**✅ ইনভয়েস বৈশিষ্ট্য:**
-- 🔢 অটো-জেনারেটেড নম্বর: `INV-` (সেলস), `BILL-` (পারচেজ)
-- 📝 পরিমাণ, একক মূল্য এবং মোট সহ লাইন আইটেম
-- 🧮 ট্যাক্স ও ডিসকাউন্ট হিসাব
-- 📅 নির্ধারিত তারিখ ট্র্যাকিং
-- 🔄 স্ট্যাটাস প্রবাহ: `Draft` → `Sent` → `Paid` / `Partial` / `Overdue` / `Cancelled`
-- 💰 স্বয়ংক্রিয় পরিশোধিত/বকেয়া পরিমাণ ট্র্যাকিং
-
----
-
-### 💳 পেমেন্ট
-
-> `/payments` এ প্রাপ্ত ও প্রদত্ত অর্থ রেকর্ড করুন
-
-| অ্যাকশন | রুট | বর্ণনা |
-|--------|-------|-------------|
-| 📥 প্রাপ্ত তালিকা | `GET /payments?type=received` | কাস্টমারদের কাছ থেকে পেমেন্ট |
-| 📤 প্রদত্ত তালিকা | `GET /payments?type=made` | সাপ্লায়ারদের পেমেন্ট |
-| ➕ প্রাপ্ত তৈরি | `GET /payments/create?type=received` | কাস্টমার পেমেন্ট রেকর্ড |
-| ➕ প্রদত্ত তৈরি | `GET /payments/create?type=made` | সাপ্লায়ার পেমেন্ট রেকর্ড |
-| 🗑️ মুছুন | `DELETE /payments/{id}` | পেমেন্ট মুছে ফেলুন |
-
-**📌 পেমেন্ট ফিল্ড:**
-- 🔢 অটো-জেনারেটেড নম্বর: `RCV-` (প্রাপ্ত), `PAY-` (প্রদত্ত)
-- 🔗 কাস্টমার/সাপ্লায়ার ও ঐচ্ছিকভাবে ইনভয়েসের সাথে লিঙ্ক
-- 💳 পেমেন্ট মাধ্যম (নগদ, চেক, ব্যাংক ট্রান্সফার ইত্যাদি)
-- 📎 রেফারেন্স নম্বর ও নোট
-
----
-
-### 💸 খরচ
-
-> `/expenses` এ ব্যবসায়িক খরচ ট্র্যাক করুন
-
-| অ্যাকশন | রুট | বর্ণনা |
-|--------|-------|-------------|
-| 📋 তালিকা | `GET /expenses` | সব খরচ দেখুন |
-| ➕ তৈরি | `GET /expenses/create` | নতুন খরচ রেকর্ড করুন |
-| ✏️ সম্পাদনা | `GET /expenses/{id}/edit` | খরচ পরিবর্তন করুন |
-| 🗑️ মুছুন | `DELETE /expenses/{id}` | খরচ মুছে ফেলুন |
-
-**📌 খরচ ফিল্ড:**
-- 🔢 অটো-জেনারেটেড নম্বর: `EXP-`
-- 📒 খরচের অ্যাকাউন্ট (চার্ট অফ অ্যাকাউন্টসের সাথে লিঙ্ক)
-- 🏭 ঐচ্ছিক সাপ্লায়ার লিঙ্ক
-- 🏷️ ক্যাটাগরি, পেমেন্ট মাধ্যম, রেফারেন্স এবং বর্ণনা
-
----
-
-### 📈 রিপোর্ট
-
-> `/reports` এ আর্থিক রিপোর্ট তৈরি করুন
-
-| রিপোর্ট | রুট | প্যারামিটার |
-|--------|-------|-----------|
-| ⚖️ ট্রায়াল ব্যালেন্স | `GET /reports/trial-balance?date=YYYY-MM-DD` | 📅 তারিখ |
-| 📊 ইনকাম স্টেটমেন্ট | `GET /reports/income-statement?start_date=&end_date=` | 📅 তারিখের পরিসর |
-| 🏦 ব্যালেন্স শিট | `GET /reports/balance-sheet?start_date=&end_date=` | 📅 তারিখের পরিসর |
-
-<details>
-<summary>📖 রিপোর্টের বর্ণনা</summary>
-
-- ⚖️ **ট্রায়াল ব্যালেন্স** — নির্দিষ্ট তারিখে সব অ্যাকাউন্টের ডেবিট ও ক্রেডিট ব্যালেন্স তালিকাভুক্ত করে
-- 📊 **ইনকাম স্টেটমেন্ট** — নির্দিষ্ট সময়ে আয় ও ব্যয় দেখিয়ে নিট লাভ/ক্ষতি গণনা করে
-- 🏦 **ব্যালেন্স শিট** — নির্দিষ্ট সময়ের সম্পদ, দায় এবং মূলধনের একটি স্ন্যাপশট
-
-</details>
-
----
-
-### 🖨️ PDF এক্সপোর্ট
-
-> প্রিন্টিং বা শেয়ারিংয়ের জন্য PDF ডকুমেন্ট তৈরি করুন
-
-| ডকুমেন্ট | রুট | আইকন |
-|----------|-------|------|
-| ইনভয়েস | `GET /pdf/invoice/{id}` | 🧾 |
-| জার্নাল এন্ট্রি | `GET /pdf/journal/{id}` | 📝 |
-| কাস্টমার তালিকা | `GET /pdf/customers` | 👥 |
-| সাপ্লায়ার তালিকা | `GET /pdf/suppliers` | 🏭 |
-| খরচ তালিকা | `GET /pdf/expenses` | 💸 |
-| ট্রায়াল ব্যালেন্স | `GET /pdf/trial-balance` | ⚖️ |
-| ইনকাম স্টেটমেন্ট | `GET /pdf/income-statement` | 📊 |
-| ব্যালেন্স শিট | `GET /pdf/balance-sheet` | 🏦 |
-
-> 🇧🇩 PDF সোলায়মানলিপি ফন্টের মাধ্যমে **বাংলা টেক্সট রেন্ডারিং** সাপোর্ট করে।
-
----
-
-### 🔐 ইউজার ও রোল ম্যানেজমেন্ট
-
-> `/settings` এর অধীনে ইউজার, রোল এবং পারমিশন পরিচালনা করুন (যথাযথ পারমিশন প্রয়োজন)
-
-#### 👤 ইউজার (`/settings/users`)
-- ➕ তৈরি, ✏️ সম্পাদনা এবং 🗑️ ইউজার অ্যাকাউন্ট মুছে ফেলুন
-- 🏷️ ইউজারদের রোল বরাদ্দ করুন
-- ✉️ নতুন অ্যাকাউন্টের জন্য ইমেইল ভেরিফিকেশন প্রয়োজন
-
-#### 🛡️ রোল (`/settings/roles`)
-- ➕ কাস্টম রোল তৈরি করুন (যেমন: Admin, Accountant, Viewer)
-- 🔗 প্রতিটি রোলে পারমিশন বরাদ্দ করুন
-
-#### 🔑 পারমিশন (`/settings/permissions`)
-- 🎯 বিস্তারিত পারমিশন সিস্টেম
-- 📛 পারমিশন নামকরণ প্যাটার্ন: `module.action.resource`
-
-**📌 উপলব্ধ পারমিশন গ্রুপ:**
-
-| মডিউল | পারমিশন |
-|--------|------------|
-| 👤 `settings.users` | `view` · `create` · `edit` · `delete` |
-| 🛡️ `settings.roles` | `view` · `create` · `edit` · `delete` |
-| 🔑 `settings.permissions` | `view` · `create` · `edit` · `delete` |
-
----
-
-## 🔌 API রেফারেন্স
-
-অ্যাপ্লিকেশনে একটি Sanctum-ভিত্তিক API এন্ডপয়েন্ট রয়েছে:
-
-```http
-GET /api/user
-Authorization: Bearer <token>
+```
+📧 Email:    admin@admin.com
+🔒 Password: password
 ```
 
-> 🔐 অথেনটিকেটেড ইউজারের বিবরণ রিটার্ন করে। একটি বৈধ **Sanctum টোকেন** প্রয়োজন।
+Admin role সব permission সহ automatically assign হয়ে যাবে।
 
-অন্যান্য সব ফাংশনালিটি উপরে তালিকাভুক্ত ওয়েব রুটের মাধ্যমে অ্যাক্সেসযোগ্য।
+---
+
+## 📖 মডিউলসমূহ
+
+### 📊 Dashboard (`/dashboard`)
+- 💵 Cash in Hand, Cash at Bank
+- 📥 Total Receivable, 📤 Total Payable
+- 📊 Income vs Expense — Last 6 months chart
+- 🧾 Recent invoices, payments, expenses
+- ⚠️ Overdue invoices alert
+- 🌅 Time-based greeting (Good Morning/Afternoon/Evening)
+
+### 📒 Accounting
+- **Chart of Accounts** (`/accounts`) — 5 types, opening balance, ledger view
+- **Account Groups** (`/account-groups`) — hierarchical parent-child
+- **Journal Entries** (`/journals`) — 6 voucher types, auto-numbered, debit=credit validation
+- **Tax Rates** (`/tax-rates`) — VAT/GST rates with default flag
+
+### 📦 Inventory
+- **Products** (`/products`) — SKU (auto-generated), unit, prices, reorder level
+- **Stock Adjustments** — Manual in/out/exact adjustment via modal
+- **Stock Report** (`/products/stock-report`) — Total value, low/out of stock counts
+- **Movement History** (`/products/{id}/movements`) — Full audit trail per product
+
+### 🧾 Sales & Purchase
+- **Quotations** (`/quotations`) — Subject, valid-until, terms, **convert to invoice**
+- **Sales Invoices** (`/invoices?type=sales`) — Product dropdown, serial no, warranty, tax auto-calc, email to customer
+- **Purchase Bills** (`/invoices?type=purchase`) — Same but stock increases
+- **Credit Notes** (`/credit-debit-notes?type=credit`) — Sales return → stock IN
+- **Debit Notes** (`/credit-debit-notes?type=debit`) — Purchase return → stock OUT
+
+### 💳 Transactions & Contacts
+- **Payments** (`/payments?type=received|made`) — Link to invoice, methods, reference
+- **Expenses** (`/expenses`) — Category, linked account, supplier
+- **Customers** (`/customers`) — Contact, opening balance, total due (auto)
+- **Suppliers** (`/suppliers`) — Contact, total payable (auto)
+
+### 📈 Reports (`/reports/*`)
+- Trial Balance, Income Statement, Balance Sheet
+- Aged Receivables (5 buckets)
+- Aged Payables (5 buckets)
+- All exportable as PDF
+
+### 🏢 Company (`/company-settings` & `/branches`)
+- Company profile with logo upload
+- Multiple branches management with Head Office flag
+- PDF footer + Terms & Conditions
+
+### 🔐 Administration
+- **Audit Log** (`/audit-logs`) — Filter by action/model/user, old vs new side-by-side
+- **Users** (`/settings/users`) — Create/edit with role assignment
+- **Roles** (`/settings/roles`) — Custom roles with permission sets
+- **Permissions** (`/settings/permissions`) — 48 granular permissions across 12 modules
 
 ---
 
 ## 🗄️ ডাটাবেস স্কিমা
 
+**মূল টেবিল (২০+):**
+
 ```
-┌─────────────────────┐     ┌──────────────────────┐     ┌─────────────────┐
-│      users          │     │   journal_entries     │     │    accounts     │
-│  (অথেনটিকেশন)       │────▶│  (ভাউচার/এন্ট্রি)       │◀────│  (চার্ট অফ A/C) │
-└─────────────────────┘     └──────────────────────┘     └─────────────────┘
-         │                           │                           │
-         │                  ┌────────┴────────┐         ┌───────┴───────┐
-         │                  │ journal_entry_   │         │ account_      │
-         │                  │ items (Dr/Cr)    │         │ groups        │
-         │                  └─────────────────┘         └───────────────┘
-         │
-    ┌────┴─────┐     ┌──────────────┐     ┌──────────────┐
-    │ invoices │────▶│ invoice_items│     │  payments    │
-    └────┬─────┘     └──────────────┘     └──────┬───────┘
-         │                                        │
-    ┌────┴─────┐     ┌──────────────┐            │
-    │customers │     │  suppliers   │◀───────────┘
-    └──────────┘     └──────┬───────┘
-                            │
-                     ┌──────┴───────┐
-                     │   expenses   │
-                     └──────────────┘
+users, roles, permissions, model_has_roles, model_has_permissions, role_has_permissions
+company_settings, branches, audit_logs
+accounts, account_groups, journal_entries, journal_entry_items
+customers, suppliers
+products, stock_movements
+tax_rates
+quotations, quotation_items
+invoices, invoice_items
+credit_debit_notes, credit_debit_note_items
+payments, expenses
 ```
 
-| টেবিল | বর্ণনা | আইকন |
-|-------|-------------|------|
-| `users` | অ্যাপ্লিকেশন ইউজার | 👤 |
-| `accounts` | চার্ট অফ অ্যাকাউন্টস | 📒 |
-| `account_groups` | অ্যাকাউন্ট গ্রুপ হায়ারার্কি | 🗂️ |
-| `customers` | কাস্টমার রেকর্ড | 👥 |
-| `suppliers` | সাপ্লায়ার রেকর্ড | 🏭 |
-| `journal_entries` | জার্নাল এন্ট্রি হেডার | 📝 |
-| `journal_entry_items` | জার্নাল এন্ট্রি লাইন আইটেম (ডেবিট/ক্রেডিট) | 📄 |
-| `invoices` | সেলস ও পারচেজ ইনভয়েস | 🧾 |
-| `invoice_items` | ইনভয়েস লাইন আইটেম | 📋 |
-| `payments` | পেমেন্ট লেনদেন | 💳 |
-| `expenses` | খরচ রেকর্ড | 💸 |
-| `roles` | রোল সংজ্ঞা (Spatie) | 🛡️ |
-| `permissions` | পারমিশন সংজ্ঞা (Spatie) | 🔑 |
-| `model_has_roles` | ইউজার-রোল বরাদ্দ | 🔗 |
-| `model_has_permissions` | সরাসরি ইউজার-পারমিশন বরাদ্দ | 🔗 |
-| `role_has_permissions` | রোল-পারমিশন ম্যাপিং | 🔗 |
+**বিশেষ সম্পর্ক:**
+- 🔗 `invoice_items.product_id` → auto stock movement
+- 🔄 `quotations.converted_invoice_id` → link after conversion
+- 📎 `credit_debit_notes.invoice_id` → optional original invoice link
+- 🏬 `invoices.branch_id` → branch tagging per invoice
 
 ---
 
+## 🌐 Bilingual সাপোর্ট
+
+- 🇬🇧 English (default)
+- 🇧🇩 বাংলা (complete translation)
+
+Navbar এ 🌐 language switcher dropdown — session-based, instant switch। Translation files: [lang/en/messages.php](lang/en/messages.php) & [lang/bn/messages.php](lang/bn/messages.php)।
+
+PDF এ বাংলা রেন্ডার হয় **SolaimanLipi** ফন্টের মাধ্যমে।
+
+---
+
+## 🎨 UI ফিচার
+
+### 🌙 Dark / Light Mode
+Navbar এর 🌙/☀️ আইকনে ক্লিক করে টগল। Sidebar, cards, forms সবকিছু automatic adapt। Preference localStorage এ save।
+
+### 🎭 Modern Login
+Glassmorphism card + animated gradient background + floating blurred shapes + demo credentials displayed।
+
+### 📊 Dashboard
+- Time-based gradient welcome hero
+- Gradient stat cards (Cash, Bank, Receivable, Payable)
+- ApexCharts দিয়ে interactive charts
+- Real-time KPIs
+
+### 🖼️ PDF Template (JM International Style)
+প্রতিটা invoice PDF এ:
+- Logo + company name + address + contact (header)
+- Two-column invoice meta (Invoice #, Customer, Address, Mobile | Date, Branch, P.O., Req No, Sold By, Print Time)
+- Items table with Serial No + Warranty
+- "IN WORDS" amount in English
+- Customer + Authorized signatures
+- Footer note + all branches listed
+
+---
+
+## 📧 ইমেইল সেটআপ
+
+Invoice কে customer এর ইমেইলে পাঠানোর জন্য:
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your@gmail.com
+MAIL_PASSWORD=your-app-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="no-reply@company.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+> **Gmail:** [App Password তৈরি করুন](https://myaccount.google.com/apppasswords) (2-Step verification অন থাকতে হবে)
+
+Invoice show পেজে **"Email to Customer"** বাটন আসবে (যদি customer এর email থাকে)। পাঠানোর সাথে সাথে draft → sent status এ মুভ।
+
+---
+
+## 🎯 ডিফল্ট Roles & Permissions
+
+Seeder ৩টা role তৈরি করে:
+
+| Role | Access |
+|------|--------|
+| 👑 **Admin** | সব ১২টা module এর সব permission |
+| 💼 **Accountant** | Settings (Users/Roles/Permissions) ছাড়া সব |
+| 👁️ **Viewer** | শুধু view permission |
+
+১২টা module × ৪টা action (view/create/edit/delete) = **৪৮টা permission**
+
+---
+
+## 📂 Directory Structure
+
+```
+accounting-software/
+├── app/
+│   ├── Http/Controllers/     (23+ controllers)
+│   ├── Models/                (20+ models)
+│   ├── Traits/Auditable.php  (auto-log trait)
+│   └── Mail/InvoiceMail.php  (email mailable)
+├── database/migrations/       (20+ migrations)
+├── resources/
+│   ├── views/                 (70+ blade files)
+│   └── css/app.css
+├── lang/
+│   ├── en/messages.php
+│   └── bn/messages.php
+├── public/
+│   ├── css/theme.css         (custom theme + dark mode)
+│   └── storage/              (logo uploads — via symlink)
+└── routes/web.php
+```
+
+---
+
+## 📄 লাইসেন্স
+
 <p align="center">
-  📄 এই প্রজেক্টটি ওপেন-সোর্স সফটওয়্যার, <a href="LICENSE">MIT লাইসেন্স</a> এর অধীনে লাইসেন্সকৃত।
+  📄 <a href="LICENSE">MIT License</a>
 </p>
 
 <p align="center">
-  Laravel দিয়ে ❤️ সহকারে তৈরি
+  Laravel দিয়ে ❤️ সহকারে তৈরি · Bangladesh 🇧🇩
 </p>

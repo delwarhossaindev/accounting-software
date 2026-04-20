@@ -1,18 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
-<!-- Content Header -->
+<!-- Welcome Hero -->
 <div class="content-header">
     <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0"><i class="fas fa-tachometer-alt mr-2 text-primary"></i>Dashboard</h1>
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                    <li class="breadcrumb-item active">Dashboard</li>
-                </ol>
+        <div class="welcome-hero" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%); border-radius: 16px; padding: 24px 28px; color: #fff; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; background: rgba(255,255,255,0.08); border-radius: 50%;"></div>
+            <div style="position: absolute; bottom: -30px; right: 60px; width: 120px; height: 120px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+            <div class="row align-items-center" style="position: relative; z-index: 1;">
+                <div class="col-md-8">
+                    <h1 class="m-0" style="font-weight: 700; font-size: 1.8rem; color: #fff;">
+                        @php
+                            $hour = (int) now()->format('H');
+                            $greeting = $hour < 12 ? 'Good Morning' : ($hour < 17 ? 'Good Afternoon' : 'Good Evening');
+                        @endphp
+                        {{ $greeting }}, {{ Auth::user()->name }} 👋
+                    </h1>
+                    <p class="m-0 mt-2" style="color: rgba(255,255,255,0.85); font-size: 1rem;">
+                        <i class="far fa-calendar-alt mr-2"></i>{{ now()->format('l, d F Y') }}
+                        <span class="ml-3"><i class="far fa-clock mr-1"></i>{{ now()->format('h:i A') }}</span>
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-right d-none d-md-block">
+                    <i class="fas fa-chart-line" style="font-size: 4.5rem; opacity: 0.25;"></i>
+                </div>
             </div>
         </div>
     </div>

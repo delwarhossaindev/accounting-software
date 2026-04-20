@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Account extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     protected $fillable = ['code', 'name', 'type', 'account_group_id', 'opening_balance', 'description', 'is_active'];
 
