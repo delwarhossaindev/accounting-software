@@ -10,7 +10,9 @@ use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\JournalEntry;
 use App\Models\Payment;
+use App\Models\Quotation;
 use App\Models\Supplier;
+use App\Services\QuotationPdfService;
 use Illuminate\Http\Request;
 use Mpdf\Mpdf;
 
@@ -73,6 +75,16 @@ class PdfController extends Controller
         $html .= '<td style="text-align: right; color: #6c757d; font-size: 10px;">Generated: ' . $date . '</td>';
         $html .= '</tr></table><br>';
         return $html;
+    }
+
+    // ========== Quotation PDF ==========
+    public function quotation(Quotation $quotation, QuotationPdfService $service)
+    {
+        $pdf = $service->render($quotation);
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $service->filename($quotation) . '"',
+        ]);
     }
 
     // ========== Invoice PDF ==========

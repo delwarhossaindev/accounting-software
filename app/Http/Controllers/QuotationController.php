@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\QuotationMail;
+use App\Models\Invoice;
 use App\Models\Quotation;
 use App\Repositories\Contracts\BranchRepositoryInterface;
 use App\Repositories\Contracts\CustomerRepositoryInterface;
@@ -9,9 +11,11 @@ use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use App\Repositories\Contracts\ProductRepositoryInterface;
 use App\Repositories\Contracts\QuotationRepositoryInterface;
 use App\Repositories\Contracts\TaxRateRepositoryInterface;
-use App\Models\Invoice;
+use App\Services\QuotationPdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 
 class QuotationController extends Controller
 {
@@ -134,6 +138,107 @@ class QuotationController extends Controller
 
         $this->quotations->update($quotation, ['status' => $validated['status']]);
         return back()->with('success', 'Status updated successfully.');
+    }
+
+    public function sendEmail(Request $request, Quotation $quotation)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'message' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            Mail::to($validated['email'])
+                ->send(new QuotationMail($quotation, $validated['message'] ?? ''));
+
+            if ($quotation->status === 'draft') {
+                $this->quotations->update($quotation, ['status' => 'sent']);
+            }
+
+            return back()->with('success', 'Quotation emailed to ' . $validated['email']);
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
+        }
+    }
+
+    public function whatsappLink(Quotation $quotation)
+    {
+        $phone = $this->normalizePhone($quotation->customer?->phone);
+        if (!$phone) {
+            return back()->with('error', 'Customer phone number is missing or invalid.');
+        }
+
+        $pdfUrl = URL::temporarySignedRoute(
+            'quotations.public-pdf',
+            now()->addDays(7),
+            ['quotation' => $quotation->id]
+        );
+
+        $company = \App\Models\CompanySetting::current();
+        $customer = $quotation->customer?->name ?? 'Customer';
+        $currency = $company->currency_symbol ?? '৳';
+
+        $lines = [
+            "Hello {$customer},",
+            "",
+            "Here is your quotation from *{$company->name}*:",
+            "",
+            "📄 Quotation: *{$quotation->quotation_no}*",
+            "📅 Date: " . $quotation->date->format('d M Y'),
+        ];
+        if ($quotation->valid_until) {
+            $lines[] = "⏳ Valid Until: " . $quotation->valid_until->format('d M Y');
+        }
+        if ($quotation->subject) {
+            $lines[] = "📌 Subject: {$quotation->subject}";
+        }
+        $lines[] = "💰 Total: {$currency} " . number_format($quotation->total, 2);
+        $lines[] = "";
+        $lines[] = "View / Download PDF:";
+        $lines[] = $pdfUrl;
+        $lines[] = "";
+        $lines[] = "Please let us know if you have any questions.";
+        $lines[] = "";
+        $lines[] = "Thank you,";
+        $lines[] = $company->name;
+
+        $text = implode("\n", $lines);
+        $waUrl = 'https://wa.me/' . $phone . '?text=' . rawurlencode($text);
+
+        if ($quotation->status === 'draft') {
+            $this->quotations->update($quotation, ['status' => 'sent']);
+        }
+
+        return redirect()->away($waUrl);
+    }
+
+    public function publicPdf(Quotation $quotation, QuotationPdfService $service, Request $request)
+    {
+        if (!$request->hasValidSignature()) {
+            abort(403, 'Link expired or invalid.');
+        }
+
+        $pdf = $service->render($quotation);
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $service->filename($quotation) . '"',
+        ]);
+    }
+
+    private function normalizePhone(?string $phone): ?string
+    {
+        if (!$phone) return null;
+        $digits = preg_replace('/\D+/', '', $phone);
+        if (!$digits) return null;
+
+        // If starts with 0, assume BD and prefix 880
+        if (str_starts_with($digits, '00')) {
+            $digits = substr($digits, 2);
+        } elseif (str_starts_with($digits, '0')) {
+            $digits = '880' . substr($digits, 1);
+        }
+
+        return $digits;
     }
 
     public function convertToInvoice(Quotation $quotation)

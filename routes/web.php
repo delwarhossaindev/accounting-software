@@ -39,6 +39,11 @@ Route::get('/lang/{locale}', function ($locale) {
     return redirect()->back();
 })->name('lang.switch');
 
+// Public signed PDF for quotations — shared via WhatsApp/email (no auth, signed link expires)
+Route::get('quotations/{quotation}/public-pdf', [QuotationController::class, 'publicPdf'])
+    ->middleware('signed')
+    ->name('quotations.public-pdf');
+
 // Two-factor challenge (needs auth only — NOT verified, and NOT 2fa middleware itself)
 Route::middleware(['auth'])->group(function () {
     Route::get('/2fa/challenge', [\App\Http\Controllers\TwoFactorController::class, 'showChallenge'])->name('2fa.challenge');
@@ -74,6 +79,8 @@ Route::middleware(['auth', 'verified', '2fa'])->group(function () {
     // Quotations
     Route::post('quotations/{quotation}/convert', [QuotationController::class, 'convertToInvoice'])->name('quotations.convert');
     Route::post('quotations/{quotation}/status', [QuotationController::class, 'updateStatus'])->name('quotations.status');
+    Route::post('quotations/{quotation}/email', [QuotationController::class, 'sendEmail'])->name('quotations.email');
+    Route::get('quotations/{quotation}/whatsapp', [QuotationController::class, 'whatsappLink'])->name('quotations.whatsapp');
     Route::resource('quotations', QuotationController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
 
     // Credit & Debit Notes
@@ -133,6 +140,7 @@ Route::middleware(['auth', 'verified', '2fa'])->group(function () {
 
     // PDF Export
     Route::get('pdf/invoice/{invoice}', [PdfController::class, 'invoice'])->name('pdf.invoice');
+    Route::get('pdf/quotation/{quotation}', [PdfController::class, 'quotation'])->name('pdf.quotation');
     Route::get('pdf/journal/{journal}', [PdfController::class, 'journal'])->name('pdf.journal');
     Route::get('pdf/customers', [PdfController::class, 'customers'])->name('pdf.customers');
     Route::get('pdf/suppliers', [PdfController::class, 'suppliers'])->name('pdf.suppliers');

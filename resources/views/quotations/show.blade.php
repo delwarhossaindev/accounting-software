@@ -7,10 +7,20 @@
             <div class="col-sm-6"><h1><i class="fas fa-file-signature mr-2"></i>{{ $quotation->quotation_no }}</h1></div>
             <div class="col-sm-6">
                 <div class="float-sm-right">
+                    <a href="{{ route('pdf.quotation', $quotation) }}" target="_blank" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-file-pdf mr-1"></i> PDF
+                    </a>
+                    <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#emailModal">
+                        <i class="fas fa-envelope mr-1"></i> Email
+                    </button>
+                    <a href="{{ route('quotations.whatsapp', $quotation) }}" target="_blank" class="btn btn-success btn-sm"
+                       title="{{ $quotation->customer?->phone ? 'Send via WhatsApp to ' . $quotation->customer->phone : 'Customer phone missing' }}">
+                        <i class="fab fa-whatsapp mr-1"></i> WhatsApp
+                    </a>
                     @if($quotation->status !== 'converted')
                         <form action="{{ route('quotations.convert', $quotation) }}" method="POST" class="d-inline" onsubmit="return confirm('Convert this to invoice?')">
                             @csrf
-                            <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-exchange-alt mr-1"></i> Convert to Invoice</button>
+                            <button type="submit" class="btn btn-warning btn-sm"><i class="fas fa-exchange-alt mr-1"></i> Convert to Invoice</button>
                         </form>
                     @endif
                     <a href="{{ route('quotations.index') }}" class="btn btn-default btn-sm"><i class="fas fa-arrow-left mr-1"></i> Back</a>
@@ -104,4 +114,40 @@
         </div>
     </div>
 </section>
+
+{{-- Email Modal --}}
+<div class="modal fade" id="emailModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('quotations.email', $quotation) }}">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-envelope mr-2"></i>Email Quotation</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Recipient Email *</label>
+                        <input type="email" name="email" class="form-control" required
+                               value="{{ $quotation->customer?->email }}"
+                               placeholder="customer@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Custom Message (optional)</label>
+                        <textarea name="message" rows="3" class="form-control"
+                                  placeholder="Add a personal note..."></textarea>
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-paperclip mr-1"></i>
+                        The PDF ({{ $quotation->quotation_no }}.pdf) will be attached automatically.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane mr-1"></i> Send Email</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
