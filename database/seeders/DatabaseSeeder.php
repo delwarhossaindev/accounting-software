@@ -21,10 +21,22 @@ class DatabaseSeeder extends Seeder
         // Roles & permissions
         $this->call(RolesAndPermissionsSeeder::class);
 
+        // Company settings, branches, tax rates
+        $this->call(CompanySettingSeeder::class);
+        $this->call(BranchSeeder::class);
+        $this->call(TaxRateSeeder::class);
+
         // Seed default chart of accounts
         $this->call(DefaultAccountSeeder::class);
 
-        // Seed demo data
+        // Products & opening stock
+        $this->call(ProductSeeder::class);
+
+        // Seed demo data (customers, suppliers, invoices, payments, expenses, journals)
         $this->call(DemoDataSeeder::class);
+
+        // Quotations and credit/debit notes (depend on customers, suppliers, invoices, products)
+        $this->call(QuotationSeeder::class);
+        $this->call(CreditDebitNoteSeeder::class);
     }
 }

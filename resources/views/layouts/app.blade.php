@@ -381,6 +381,53 @@
         });
     });
 
+    // Sidebar — remember scroll position across page loads so active menu stays visible
+    $(function() {
+        const $outer = $('.main-sidebar');
+        const $inner = $('.main-sidebar .sidebar');
+        if (!$outer.length) return;
+
+        const key = 'sidebarScrollTop';
+
+        // Pick whichever element is actually scrollable
+        const pickScrollEl = () => {
+            if ($inner.length && $inner[0].scrollHeight > $inner[0].clientHeight) return $inner;
+            return $outer;
+        };
+
+        const $scrollEl = pickScrollEl();
+
+        // Restore previous scroll position
+        const saved = sessionStorage.getItem(key);
+        if (saved !== null) {
+            $scrollEl.scrollTop(parseInt(saved, 10) || 0);
+        }
+
+        // If active menu item is not visible, scroll it into view
+        const active = $outer.find('.nav-link.active').last()[0];
+        if (active) {
+            const rect = active.getBoundingClientRect();
+            const inView = rect.top >= 0 && rect.bottom <= window.innerHeight;
+            if (!inView) {
+                active.scrollIntoView({ block: 'center', behavior: 'auto' });
+            }
+        }
+
+        // Save scroll when clicking a sidebar link (before navigation)
+        $outer.on('click', 'a.nav-link', function() {
+            sessionStorage.setItem(key, $scrollEl.scrollTop());
+        });
+
+        // Also persist ongoing scroll (throttled)
+        let t;
+        $scrollEl.on('scroll', function() {
+            clearTimeout(t);
+            t = setTimeout(() => {
+                sessionStorage.setItem(key, $scrollEl.scrollTop());
+            }, 120);
+        });
+    });
+
     // Dark Mode Toggle
     $(function() {
         const body = document.body;
