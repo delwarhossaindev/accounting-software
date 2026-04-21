@@ -12,7 +12,17 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Run recurring transactions daily at 2:00 AM
+        $schedule->command('recurring:run')->dailyAt('02:00');
+
+        // Email overdue invoice reminders every morning at 8:00 AM
+        $schedule->command('invoices:overdue-reminders')->dailyAt('08:00');
+
+        // Auto-mark invoices overdue
+        $schedule->command('invoices:mark-overdue')->dailyAt('00:10');
+
+        // Automated database backup every night at 1:00 AM
+        $schedule->command('backup:run --only-db')->dailyAt('01:00');
     }
 
     /**

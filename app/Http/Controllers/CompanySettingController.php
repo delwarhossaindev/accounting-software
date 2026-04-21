@@ -2,21 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CompanySetting;
+use App\Repositories\Contracts\CompanySettingRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class CompanySettingController extends Controller
 {
+    public function __construct(private CompanySettingRepositoryInterface $settings) {}
+
     public function edit()
     {
-        $company = CompanySetting::current();
+        $company = $this->settings->current();
         return view('company-settings.edit', compact('company'));
     }
 
     public function update(Request $request)
     {
-        $company = CompanySetting::current();
+        $company = $this->settings->current();
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -37,7 +39,6 @@ class CompanySettingController extends Controller
             'remove_logo' => 'nullable|boolean',
         ]);
 
-        // Handle logo
         if ($request->boolean('remove_logo') && $company->logo_path) {
             Storage::disk('public')->delete($company->logo_path);
             $validated['logo_path'] = null;
@@ -52,7 +53,7 @@ class CompanySettingController extends Controller
 
         unset($validated['logo'], $validated['remove_logo']);
 
-        $company->update($validated);
+        $this->settings->update($validated);
 
         return redirect()->route('company-settings.edit')->with('success', 'Company settings updated successfully.');
     }

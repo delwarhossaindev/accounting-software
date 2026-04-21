@@ -169,6 +169,92 @@ class ReportController extends Controller
         return view('reports.aged-receivables', compact('report', 'totals', 'asOfDate'));
     }
 
+    public function cashflowStatement(Request $request)
+    {
+        $startDate = $request->get('start_date', now()->startOfYear()->format('Y-m-d'));
+        $endDate = $request->get('end_date', now()->format('Y-m-d'));
+
+        // Find cash & bank accounts (codes 1001, 1002)
+        $cashAccounts = Account::whereIn('code', ['1001', '1002'])->get();
+
+        $opening = 0;
+        $closing = 0;
+        foreach ($cashAccounts as $acc) {
+            $before = JournalEntryItem::whereHas('journalEntry', fn($q) => $q->where('date', '<', $startDate))
+                ->where('account_id', $acc->id);
+            $opening += $acc->opening_balance + $before->sum('debit') - $before->sum('credit');
+
+            $upto = JournalEntryItem::whereHas('journalEntry', fn($q) => $q->where('date', '<=', $endDate))
+                ->where('account_id', $acc->id);
+            $closing += $acc->opening_balance + $upto->sum('debit') - $upto->sum('credit');
+        }
+
+        // Only journal items that hit a cash/bank account between the dates
+        $cashIds = $cashAccounts->pluck('id')->toArray();
+
+        $movements = JournalEntryItem::with(['journalEntry', 'account'])
+            ->whereHas('journalEntry', fn($q) => $q->whereBetween('date', [$startDate, $endDate]))
+            ->whereIn('account_id', $cashIds)
+            ->get();
+
+        $operating = ['in' => 0, 'out' => 0, 'items' => []];
+        $investing = ['in' => 0, 'out' => 0, 'items' => []];
+        $financing = ['in' => 0, 'out' => 0, 'items' => []];
+
+        foreach ($movements as $mv) {
+            $je = $mv->journalEntry;
+            $amount = ((float) $mv->debit) - ((float) $mv->credit);
+
+            $counterItems = JournalEntryItem::with('account')
+                ->where('journal_entry_id', $je->id)
+                ->where('id', '!=', $mv->id)
+                ->get();
+
+            foreach ($counterItems as $co) {
+                if (!$co->account) continue;
+                $contra = ((float) $co->credit) - ((float) $co->debit);
+                $bucket = $this->classifyCashflow($co->account);
+                $key = $contra > 0 ? 'in' : 'out';
+                $absAmt = abs($contra);
+
+                if ($absAmt == 0) continue;
+
+                ${$bucket}[$key] += $absAmt;
+                ${$bucket}['items'][] = [
+                    'date' => $je->date,
+                    'account' => $co->account->name,
+                    'narration' => $je->narration,
+                    'inflow' => $contra > 0 ? $absAmt : 0,
+                    'outflow' => $contra < 0 ? $absAmt : 0,
+                ];
+            }
+        }
+
+        $netOperating = $operating['in'] - $operating['out'];
+        $netInvesting = $investing['in'] - $investing['out'];
+        $netFinancing = $financing['in'] - $financing['out'];
+        $netChange = $netOperating + $netInvesting + $netFinancing;
+
+        return view('reports.cashflow-statement', compact(
+            'startDate', 'endDate', 'opening', 'closing',
+            'operating', 'investing', 'financing',
+            'netOperating', 'netInvesting', 'netFinancing', 'netChange'
+        ));
+    }
+
+    private function classifyCashflow(Account $account): string
+    {
+        // Investing: fixed assets (codes 15xx, except inventory)
+        if (preg_match('/^15\d\d$/', $account->code)) {
+            return 'investing';
+        }
+        // Financing: owner equity, loans
+        if ($account->type === 'equity' || str_starts_with($account->code, '25')) {
+            return 'financing';
+        }
+        return 'operating';
+    }
+
     public function agedPayables(Request $request)
     {
         $asOfDate = $request->get('as_of_date', now()->format('Y-m-d'));

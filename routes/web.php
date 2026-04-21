@@ -3,18 +3,22 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AccountGroupController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\BankReconciliationController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\CreditDebitNoteController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\JournalEntryController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QuotationController;
+use App\Http\Controllers\RecurringExpenseController;
+use App\Http\Controllers\RecurringInvoiceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Settings\PermissionController;
@@ -35,7 +39,15 @@ Route::get('/lang/{locale}', function ($locale) {
     return redirect()->back();
 })->name('lang.switch');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+// Two-factor challenge (needs auth only — NOT verified, and NOT 2fa middleware itself)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/2fa/challenge', [\App\Http\Controllers\TwoFactorController::class, 'showChallenge'])->name('2fa.challenge');
+    Route::post('/2fa/verify', [\App\Http\Controllers\TwoFactorController::class, 'verify'])->name('2fa.verify');
+    Route::post('/2fa/resend', [\App\Http\Controllers\TwoFactorController::class, 'resend'])->name('2fa.resend');
+    Route::post('/2fa/toggle', [\App\Http\Controllers\TwoFactorController::class, 'toggle'])->name('2fa.toggle');
+});
+
+Route::middleware(['auth', 'verified', '2fa'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -73,6 +85,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Expenses
     Route::resource('expenses', ExpenseController::class)->except(['show']);
 
+    // Recurring Invoices & Expenses
+    Route::resource('recurring-invoices', RecurringInvoiceController::class)->except(['show']);
+    Route::resource('recurring-expenses', RecurringExpenseController::class)->except(['show']);
+
+    // CSV Imports
+    Route::get('imports', [ImportController::class, 'index'])->name('imports.index');
+    Route::get('imports/{entity}/template', [ImportController::class, 'template'])->name('imports.template');
+    Route::post('imports/{entity}', [ImportController::class, 'store'])->name('imports.store');
+
     // Products & Inventory
     Route::get('products/stock-report', [ProductController::class, 'stockReport'])->name('products.stock-report');
     Route::get('products/{product}/movements', [ProductController::class, 'movements'])->name('products.movements');
@@ -93,10 +114,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Branches
     Route::resource('branches', BranchController::class)->except(['show']);
 
+    // Bank Reconciliation
+    Route::get('bank-reconciliation', [BankReconciliationController::class, 'index'])->name('bank-reconciliation.index');
+    Route::post('bank-reconciliation/line', [BankReconciliationController::class, 'storeLine'])->name('bank-reconciliation.line.store');
+    Route::post('bank-reconciliation/import', [BankReconciliationController::class, 'importStatement'])->name('bank-reconciliation.import');
+    Route::post('bank-reconciliation/line/{line}/match', [BankReconciliationController::class, 'match'])->name('bank-reconciliation.line.match');
+    Route::post('bank-reconciliation/line/{line}/ignore', [BankReconciliationController::class, 'ignore'])->name('bank-reconciliation.line.ignore');
+    Route::delete('bank-reconciliation/line/{line}', [BankReconciliationController::class, 'deleteLine'])->name('bank-reconciliation.line.destroy');
+    Route::post('bank-reconciliation/finalize', [BankReconciliationController::class, 'finalize'])->name('bank-reconciliation.finalize');
+
     // Reports
     Route::get('reports/trial-balance', [ReportController::class, 'trialBalance'])->name('reports.trial-balance');
     Route::get('reports/income-statement', [ReportController::class, 'incomeStatement'])->name('reports.income-statement');
     Route::get('reports/balance-sheet', [ReportController::class, 'balanceSheet'])->name('reports.balance-sheet');
+    Route::get('reports/cashflow-statement', [ReportController::class, 'cashflowStatement'])->name('reports.cashflow-statement');
     Route::get('reports/aged-receivables', [ReportController::class, 'agedReceivables'])->name('reports.aged-receivables');
     Route::get('reports/aged-payables', [ReportController::class, 'agedPayables'])->name('reports.aged-payables');
 

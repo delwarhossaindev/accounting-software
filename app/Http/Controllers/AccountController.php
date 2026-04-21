@@ -3,20 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
-use App\Models\AccountGroup;
+use App\Repositories\Contracts\AccountGroupRepositoryInterface;
+use App\Repositories\Contracts\AccountRepositoryInterface;
 use Illuminate\Http\Request;
 
 class AccountController extends Controller
 {
+    public function __construct(
+        private AccountRepositoryInterface $accounts,
+        private AccountGroupRepositoryInterface $groupsRepo,
+    ) {}
+
     public function index()
     {
-        $accounts = Account::with('group')->orderBy('code')->get();
+        $accounts = $this->accounts->all(['group'], ['code' => 'asc']);
         return view('accounts.index', compact('accounts'));
     }
 
     public function create()
     {
-        $groups = AccountGroup::all();
+        $groups = $this->groupsRepo->all();
         $types = ['asset', 'liability', 'equity', 'income', 'expense'];
         return view('accounts.create', compact('groups', 'types'));
     }
@@ -33,14 +39,14 @@ class AccountController extends Controller
         ]);
 
         $validated['opening_balance'] = $validated['opening_balance'] ?? 0;
-        Account::create($validated);
+        $this->accounts->create($validated);
 
         return redirect()->route('accounts.index')->with('success', 'Account created successfully.');
     }
 
     public function edit(Account $account)
     {
-        $groups = AccountGroup::all();
+        $groups = $this->groupsRepo->all();
         $types = ['asset', 'liability', 'equity', 'income', 'expense'];
         return view('accounts.edit', compact('account', 'groups', 'types'));
     }
@@ -56,13 +62,13 @@ class AccountController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $account->update($validated);
+        $this->accounts->update($account, $validated);
         return redirect()->route('accounts.index')->with('success', 'Account updated successfully.');
     }
 
     public function destroy(Account $account)
     {
-        $account->delete();
+        $this->accounts->delete($account);
         return redirect()->route('accounts.index')->with('success', 'Account deleted successfully.');
     }
 

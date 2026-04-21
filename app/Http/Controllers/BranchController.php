@@ -3,14 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Branch;
+use App\Repositories\Contracts\BranchRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class BranchController extends Controller
 {
+    public function __construct(private BranchRepositoryInterface $branches) {}
+
     public function index()
     {
-        $branches = Branch::orderBy('sort_order')->orderBy('name')->get();
+        $branches = $this->branches->query()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
         return view('branches.index', compact('branches'));
     }
 
@@ -37,9 +43,9 @@ class BranchController extends Controller
 
         DB::transaction(function () use ($validated) {
             if ($validated['is_head_office']) {
-                Branch::where('is_head_office', true)->update(['is_head_office' => false]);
+                $this->branches->query()->where('is_head_office', true)->update(['is_head_office' => false]);
             }
-            Branch::create($validated);
+            $this->branches->create($validated);
         });
 
         return redirect()->route('branches.index')->with('success', 'Branch created successfully.');
@@ -68,9 +74,12 @@ class BranchController extends Controller
 
         DB::transaction(function () use ($validated, $branch) {
             if ($validated['is_head_office']) {
-                Branch::where('is_head_office', true)->where('id', '!=', $branch->id)->update(['is_head_office' => false]);
+                $this->branches->query()
+                    ->where('is_head_office', true)
+                    ->where('id', '!=', $branch->id)
+                    ->update(['is_head_office' => false]);
             }
-            $branch->update($validated);
+            $this->branches->update($branch, $validated);
         });
 
         return redirect()->route('branches.index')->with('success', 'Branch updated successfully.');
@@ -82,7 +91,7 @@ class BranchController extends Controller
             return back()->with('error', 'Cannot delete branch with existing invoices.');
         }
 
-        $branch->delete();
+        $this->branches->delete($branch);
         return redirect()->route('branches.index')->with('success', 'Branch deleted successfully.');
     }
 }

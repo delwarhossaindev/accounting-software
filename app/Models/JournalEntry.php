@@ -9,11 +9,21 @@ class JournalEntry extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['voucher_no', 'date', 'narration', 'voucher_type', 'user_id', 'total_amount'];
+    protected $fillable = [
+        'voucher_no', 'date', 'narration', 'voucher_type',
+        'user_id', 'total_amount',
+        'source_type', 'source_id', 'is_auto_posted',
+    ];
 
     protected $casts = [
         'date' => 'date',
+        'is_auto_posted' => 'boolean',
     ];
+
+    public function source()
+    {
+        return $this->morphTo();
+    }
 
     public function items()
     {

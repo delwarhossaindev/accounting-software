@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccountGroup;
+use App\Repositories\Contracts\AccountGroupRepositoryInterface;
 use Illuminate\Http\Request;
 
 class AccountGroupController extends Controller
 {
+    public function __construct(private AccountGroupRepositoryInterface $groups) {}
+
     public function index()
     {
-        $groups = AccountGroup::with(['parent', 'children', 'accounts'])
+        $groups = $this->groups->query()
+            ->with(['parent', 'children', 'accounts'])
             ->orderBy('type')
             ->orderBy('name')
             ->get();
@@ -19,7 +23,7 @@ class AccountGroupController extends Controller
 
     public function create()
     {
-        $parentGroups = AccountGroup::orderBy('name')->get();
+        $parentGroups = $this->groups->all([], ['name' => 'asc']);
         $types = ['asset', 'liability', 'equity', 'income', 'expense'];
 
         return view('account-groups.create', compact('parentGroups', 'types'));
@@ -33,14 +37,15 @@ class AccountGroupController extends Controller
             'parent_id' => 'nullable|exists:account_groups,id',
         ]);
 
-        AccountGroup::create($validated);
+        $this->groups->create($validated);
 
         return redirect()->route('account-groups.index')->with('success', 'Account Group created successfully.');
     }
 
     public function edit(AccountGroup $accountGroup)
     {
-        $parentGroups = AccountGroup::where('id', '!=', $accountGroup->id)
+        $parentGroups = $this->groups->query()
+            ->where('id', '!=', $accountGroup->id)
             ->orderBy('name')
             ->get();
         $types = ['asset', 'liability', 'equity', 'income', 'expense'];
@@ -60,7 +65,7 @@ class AccountGroupController extends Controller
             return back()->withErrors(['parent_id' => 'A group cannot be its own parent.']);
         }
 
-        $accountGroup->update($validated);
+        $this->groups->update($accountGroup, $validated);
 
         return redirect()->route('account-groups.index')->with('success', 'Account Group updated successfully.');
     }
@@ -71,7 +76,7 @@ class AccountGroupController extends Controller
             return back()->withErrors(['This group cannot be deleted because it has associated accounts.']);
         }
 
-        $accountGroup->delete();
+        $this->groups->delete($accountGroup);
 
         return redirect()->route('account-groups.index')->with('success', 'Account Group deleted successfully.');
     }

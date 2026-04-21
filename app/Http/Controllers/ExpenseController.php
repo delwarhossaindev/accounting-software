@@ -2,23 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Account;
 use App\Models\Expense;
-use App\Models\Supplier;
+use App\Repositories\Contracts\AccountRepositoryInterface;
+use App\Repositories\Contracts\ExpenseRepositoryInterface;
+use App\Repositories\Contracts\SupplierRepositoryInterface;
 use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
 {
+    public function __construct(
+        private ExpenseRepositoryInterface $expenses,
+        private AccountRepositoryInterface $accounts,
+        private SupplierRepositoryInterface $suppliers,
+    ) {}
+
     public function index()
     {
-        $expenses = Expense::with(['account', 'supplier'])->latest('date')->get();
+        $expenses = $this->expenses->query()
+            ->with(['account', 'supplier'])
+            ->latest('date')
+            ->get();
         return view('expenses.index', compact('expenses'));
     }
 
     public function create()
     {
-        $accounts = Account::where('is_active', true)->where('type', 'expense')->orderBy('code')->get();
-        $suppliers = Supplier::where('is_active', true)->get();
+        $accounts = $this->accounts->query()
+            ->where('is_active', true)
+            ->where('type', 'expense')
+            ->orderBy('code')
+            ->get();
+        $suppliers = $this->suppliers->active();
         $expenseNo = Expense::generateExpenseNo();
         return view('expenses.create', compact('accounts', 'suppliers', 'expenseNo'));
     }
@@ -39,14 +53,18 @@ class ExpenseController extends Controller
         $validated['expense_no'] = Expense::generateExpenseNo();
         $validated['user_id'] = auth()->id();
 
-        Expense::create($validated);
+        $this->expenses->create($validated);
         return redirect()->route('expenses.index')->with('success', 'Expense recorded successfully.');
     }
 
     public function edit(Expense $expense)
     {
-        $accounts = Account::where('is_active', true)->where('type', 'expense')->orderBy('code')->get();
-        $suppliers = Supplier::where('is_active', true)->get();
+        $accounts = $this->accounts->query()
+            ->where('is_active', true)
+            ->where('type', 'expense')
+            ->orderBy('code')
+            ->get();
+        $suppliers = $this->suppliers->active();
         return view('expenses.edit', compact('expense', 'accounts', 'suppliers'));
     }
 
@@ -63,13 +81,13 @@ class ExpenseController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $expense->update($validated);
+        $this->expenses->update($expense, $validated);
         return redirect()->route('expenses.index')->with('success', 'Expense updated successfully.');
     }
 
     public function destroy(Expense $expense)
     {
-        $expense->delete();
+        $this->expenses->delete($expense);
         return redirect()->route('expenses.index')->with('success', 'Expense deleted successfully.');
     }
 }

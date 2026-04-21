@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\TaxRate;
+use App\Repositories\Contracts\TaxRateRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TaxRateController extends Controller
 {
+    public function __construct(private TaxRateRepositoryInterface $taxRates) {}
+
     public function index()
     {
-        $taxRates = TaxRate::orderBy('name')->get();
+        $taxRates = $this->taxRates->all([], ['name' => 'asc']);
         return view('tax-rates.index', compact('taxRates'));
     }
 
@@ -33,9 +36,9 @@ class TaxRateController extends Controller
 
         DB::transaction(function () use ($validated) {
             if ($validated['is_default']) {
-                TaxRate::where('is_default', true)->update(['is_default' => false]);
+                $this->taxRates->query()->where('is_default', true)->update(['is_default' => false]);
             }
-            TaxRate::create($validated);
+            $this->taxRates->create($validated);
         });
 
         return redirect()->route('tax-rates.index')->with('success', 'Tax rate created successfully.');
@@ -60,9 +63,12 @@ class TaxRateController extends Controller
 
         DB::transaction(function () use ($validated, $taxRate) {
             if ($validated['is_default']) {
-                TaxRate::where('is_default', true)->where('id', '!=', $taxRate->id)->update(['is_default' => false]);
+                $this->taxRates->query()
+                    ->where('is_default', true)
+                    ->where('id', '!=', $taxRate->id)
+                    ->update(['is_default' => false]);
             }
-            $taxRate->update($validated);
+            $this->taxRates->update($taxRate, $validated);
         });
 
         return redirect()->route('tax-rates.index')->with('success', 'Tax rate updated successfully.');
@@ -70,7 +76,7 @@ class TaxRateController extends Controller
 
     public function destroy(TaxRate $taxRate)
     {
-        $taxRate->delete();
+        $this->taxRates->delete($taxRate);
         return redirect()->route('tax-rates.index')->with('success', 'Tax rate deleted successfully.');
     }
 }

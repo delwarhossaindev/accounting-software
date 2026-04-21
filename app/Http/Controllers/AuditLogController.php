@@ -3,13 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
+use App\Repositories\Contracts\AuditLogRepositoryInterface;
+use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Http\Request;
 
 class AuditLogController extends Controller
 {
+    public function __construct(
+        private AuditLogRepositoryInterface $logs,
+        private UserRepositoryInterface $users,
+    ) {}
+
     public function index(Request $request)
     {
-        $query = AuditLog::with('user')->latest();
+        $query = $this->logs->query()->with('user')->latest();
 
         if ($request->filled('action')) {
             $query->where('action', $request->action);
@@ -25,8 +32,8 @@ class AuditLogController extends Controller
 
         $logs = $query->paginate(50)->withQueryString();
 
-        $users = \App\Models\User::orderBy('name')->get();
-        $modelTypes = AuditLog::distinct()->pluck('model_type')->filter()->sort()->values();
+        $users = $this->users->all([], ['name' => 'asc']);
+        $modelTypes = $this->logs->query()->distinct()->pluck('model_type')->filter()->sort()->values();
 
         return view('audit-logs.index', compact('logs', 'users', 'modelTypes'));
     }

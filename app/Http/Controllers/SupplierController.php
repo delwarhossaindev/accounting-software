@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Supplier;
+use App\Repositories\Contracts\SupplierRepositoryInterface;
 use Illuminate\Http\Request;
 
 class SupplierController extends Controller
 {
+    public function __construct(private SupplierRepositoryInterface $suppliers) {}
+
     public function index()
     {
-        $suppliers = Supplier::latest()->get();
+        $suppliers = $this->suppliers->all([], ['created_at' => 'desc']);
         return view('suppliers.index', compact('suppliers'));
     }
 
@@ -28,7 +31,7 @@ class SupplierController extends Controller
             'opening_balance' => 'nullable|numeric',
         ]);
 
-        Supplier::create($validated);
+        $this->suppliers->create($validated);
         return redirect()->route('suppliers.index')->with('success', 'Supplier created successfully.');
     }
 
@@ -47,13 +50,13 @@ class SupplierController extends Controller
             'opening_balance' => 'nullable|numeric',
         ]);
 
-        $supplier->update($validated);
+        $this->suppliers->update($supplier, $validated);
         return redirect()->route('suppliers.index')->with('success', 'Supplier updated successfully.');
     }
 
     public function destroy(Supplier $supplier)
     {
-        $supplier->delete();
+        $this->suppliers->delete($supplier);
         return redirect()->route('suppliers.index')->with('success', 'Supplier deleted successfully.');
     }
 }

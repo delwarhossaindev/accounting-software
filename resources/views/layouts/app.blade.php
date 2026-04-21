@@ -214,6 +214,20 @@
                         </a>
                     </li>
 
+                    <li class="nav-item">
+                        <a href="{{ route('recurring-invoices.index') }}" class="nav-link {{ request()->routeIs('recurring-invoices.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-sync-alt"></i>
+                            <p>{{ __('messages.recurring_invoices') }}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('recurring-expenses.index') }}" class="nav-link {{ request()->routeIs('recurring-expenses.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-redo"></i>
+                            <p>{{ __('messages.recurring_expenses') }}</p>
+                        </a>
+                    </li>
+
                     <li class="nav-header">{{ __('messages.contacts') }}</li>
 
                     <li class="nav-item">
@@ -254,6 +268,20 @@
                     </li>
 
                     <li class="nav-item">
+                        <a href="{{ route('reports.cashflow-statement') }}" class="nav-link {{ request()->routeIs('reports.cashflow-statement') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-water"></i>
+                            <p>{{ __('messages.cashflow_statement') }}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('bank-reconciliation.index') }}" class="nav-link {{ request()->routeIs('bank-reconciliation.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-university"></i>
+                            <p>{{ __('messages.bank_reconciliation') }}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
                         <a href="{{ route('reports.aged-receivables') }}" class="nav-link {{ request()->routeIs('reports.aged-receivables') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-hourglass-half"></i>
                             <p>{{ __('messages.aged_receivables') }}</p>
@@ -271,6 +299,13 @@
                         <a href="{{ route('audit-logs.index') }}" class="nav-link {{ request()->routeIs('audit-logs.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-clipboard-list"></i>
                             <p>{{ __('messages.audit_log') }}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('imports.index') }}" class="nav-link {{ request()->routeIs('imports.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-file-csv"></i>
+                            <p>{{ __('messages.import_data') }}</p>
                         </a>
                     </li>
 

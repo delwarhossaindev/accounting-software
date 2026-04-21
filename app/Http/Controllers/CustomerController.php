@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Repositories\Contracts\CustomerRepositoryInterface;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
+    public function __construct(private CustomerRepositoryInterface $customers) {}
+
     public function index()
     {
-        $customers = Customer::latest()->get();
+        $customers = $this->customers->all([], ['created_at' => 'desc']);
         return view('customers.index', compact('customers'));
     }
 
@@ -28,7 +31,7 @@ class CustomerController extends Controller
             'opening_balance' => 'nullable|numeric',
         ]);
 
-        Customer::create($validated);
+        $this->customers->create($validated);
         return redirect()->route('customers.index')->with('success', 'Customer created successfully.');
     }
 
@@ -47,13 +50,13 @@ class CustomerController extends Controller
             'opening_balance' => 'nullable|numeric',
         ]);
 
-        $customer->update($validated);
+        $this->customers->update($customer, $validated);
         return redirect()->route('customers.index')->with('success', 'Customer updated successfully.');
     }
 
     public function destroy(Customer $customer)
     {
-        $customer->delete();
+        $this->customers->delete($customer);
         return redirect()->route('customers.index')->with('success', 'Customer deleted successfully.');
     }
 }

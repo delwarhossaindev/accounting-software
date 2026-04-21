@@ -3,20 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\CreditDebitNote;
-use App\Models\Customer;
-use App\Models\Invoice;
-use App\Models\Product;
-use App\Models\StockMovement;
-use App\Models\Supplier;
+use App\Repositories\Contracts\CreditDebitNoteRepositoryInterface;
+use App\Repositories\Contracts\CustomerRepositoryInterface;
+use App\Repositories\Contracts\InvoiceRepositoryInterface;
+use App\Repositories\Contracts\ProductRepositoryInterface;
+use App\Repositories\Contracts\StockMovementRepositoryInterface;
+use App\Repositories\Contracts\SupplierRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CreditDebitNoteController extends Controller
 {
+    public function __construct(
+        private CreditDebitNoteRepositoryInterface $notes,
+        private CustomerRepositoryInterface $customers,
+        private SupplierRepositoryInterface $suppliers,
+        private ProductRepositoryInterface $products,
+        private InvoiceRepositoryInterface $invoices,
+        private StockMovementRepositoryInterface $stockMovements,
+    ) {}
+
     public function index(Request $request)
     {
         $type = $request->get('type', 'credit');
-        $notes = CreditDebitNote::with('customer', 'supplier', 'invoice')
+        $notes = $this->notes->query()
+            ->with('customer', 'supplier', 'invoice')
             ->where('type', $type)
             ->latest('date')
             ->get();
@@ -27,10 +38,14 @@ class CreditDebitNoteController extends Controller
     public function create(Request $request)
     {
         $type = $request->get('type', 'credit');
-        $customers = Customer::where('is_active', true)->orderBy('name')->get();
-        $suppliers = Supplier::where('is_active', true)->orderBy('name')->get();
-        $products = Product::where('is_active', true)->orderBy('name')->get();
-        $invoices = Invoice::where('type', $type === 'credit' ? 'sales' : 'purchase')->latest('date')->limit(200)->get();
+        $customers = $this->customers->active();
+        $suppliers = $this->suppliers->active();
+        $products = $this->products->active();
+        $invoices = $this->invoices->query()
+            ->where('type', $type === 'credit' ? 'sales' : 'purchase')
+            ->latest('date')
+            ->limit(200)
+            ->get();
         $noteNo = CreditDebitNote::generateNoteNo($type);
 
         return view('credit-debit-notes.create', compact('type', 'customers', 'suppliers', 'products', 'invoices', 'noteNo'));
@@ -62,7 +77,7 @@ class CreditDebitNoteController extends Controller
             $tax = $validated['tax'] ?? 0;
             $total = $subtotal + $tax;
 
-            $note = CreditDebitNote::create([
+            $note = $this->notes->create([
                 'note_no' => CreditDebitNote::generateNoteNo($validated['type']),
                 'type' => $validated['type'],
                 'date' => $validated['date'],
@@ -86,9 +101,8 @@ class CreditDebitNoteController extends Controller
                     'amount' => $item['quantity'] * $item['unit_price'],
                 ]);
 
-                // Stock movement: credit note = goods come BACK IN, debit note = goods go OUT
                 if (!empty($item['product_id'])) {
-                    $product = Product::find($item['product_id']);
+                    $product = $this->products->find($item['product_id']);
                     if ($product) {
                         $movementType = $validated['type'] === 'credit' ? 'in' : 'out';
 
@@ -103,7 +117,7 @@ class CreditDebitNoteController extends Controller
                         }
                         $product->save();
 
-                        StockMovement::create([
+                        $this->stockMovements->create([
                             'product_id' => $product->id,
                             'type' => $movementType,
                             'quantity' => $item['quantity'],
@@ -134,10 +148,9 @@ class CreditDebitNoteController extends Controller
         $type = $creditDebitNote->type;
 
         DB::transaction(function () use ($creditDebitNote) {
-            // Reverse stock
             foreach ($creditDebitNote->items as $item) {
                 if ($item->product_id) {
-                    $product = Product::find($item->product_id);
+                    $product = $this->products->find($item->product_id);
                     if ($product) {
                         if ($creditDebitNote->type === 'credit') {
                             $product->current_stock -= $item->quantity;
@@ -149,11 +162,12 @@ class CreditDebitNoteController extends Controller
                 }
             }
 
-            StockMovement::where('reference_type', $creditDebitNote->type . '_note')
+            $this->stockMovements->query()
+                ->where('reference_type', $creditDebitNote->type . '_note')
                 ->where('reference_id', $creditDebitNote->id)
                 ->delete();
 
-            $creditDebitNote->delete();
+            $this->notes->delete($creditDebitNote);
         });
 
         return redirect()->route('credit-debit-notes.index', ['type' => $type])->with('success', 'Note deleted successfully.');

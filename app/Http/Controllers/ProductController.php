@@ -3,15 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\StockMovement;
+use App\Repositories\Contracts\ProductRepositoryInterface;
+use App\Repositories\Contracts\StockMovementRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
+    public function __construct(
+        private ProductRepositoryInterface $products,
+        private StockMovementRepositoryInterface $stockMovements,
+    ) {}
+
     public function index()
     {
-        $products = Product::orderBy('name')->get();
+        $products = $this->products->all([], ['name' => 'asc']);
         return view('products.index', compact('products'));
     }
 
@@ -42,10 +48,10 @@ class ProductController extends Controller
         $validated['reorder_level'] = $validated['reorder_level'] ?? 0;
 
         DB::transaction(function () use ($validated) {
-            $product = Product::create($validated);
+            $product = $this->products->create($validated);
 
             if ($product->current_stock > 0) {
-                StockMovement::create([
+                $this->stockMovements->create([
                     'product_id' => $product->id,
                     'type' => 'in',
                     'quantity' => $product->current_stock,
@@ -84,7 +90,7 @@ class ProductController extends Controller
         $validated['is_active'] = $request->has('is_active');
         $validated['reorder_level'] = $validated['reorder_level'] ?? 0;
 
-        $product->update($validated);
+        $this->products->update($product, $validated);
 
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
@@ -95,7 +101,7 @@ class ProductController extends Controller
             return back()->with('error', 'Cannot delete product with stock movement history.');
         }
 
-        $product->delete();
+        $this->products->delete($product);
         return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
     }
 
@@ -123,7 +129,7 @@ class ProductController extends Controller
 
             $product->save();
 
-            StockMovement::create([
+            $this->stockMovements->create([
                 'product_id' => $product->id,
                 'type' => $validated['type'],
                 'quantity' => $qty,
@@ -140,7 +146,7 @@ class ProductController extends Controller
 
     public function stockReport(Request $request)
     {
-        $products = Product::orderBy('name')->get();
+        $products = $this->products->all([], ['name' => 'asc']);
 
         $totalStockValue = $products->sum(fn($p) => $p->current_stock * $p->purchase_price);
         $outOfStock = $products->filter(fn($p) => $p->current_stock <= 0)->count();
@@ -151,8 +157,9 @@ class ProductController extends Controller
 
     public function movements(Product $product)
     {
-        $movements = $product->stockMovements()
+        $movements = $this->stockMovements->query()
             ->with('user')
+            ->where('product_id', $product->id)
             ->orderBy('date', 'desc')
             ->orderBy('id', 'desc')
             ->get();

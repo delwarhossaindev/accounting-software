@@ -2,22 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Account;
 use App\Models\JournalEntry;
+use App\Repositories\Contracts\AccountRepositoryInterface;
+use App\Repositories\Contracts\JournalEntryRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class JournalEntryController extends Controller
 {
+    public function __construct(
+        private JournalEntryRepositoryInterface $journals,
+        private AccountRepositoryInterface $accounts,
+    ) {}
+
     public function index()
     {
-        $entries = JournalEntry::with('items.account', 'user')->latest('date')->get();
+        $entries = $this->journals->query()
+            ->with('items.account', 'user')
+            ->latest('date')
+            ->get();
         return view('journals.index', compact('entries'));
     }
 
     public function create()
     {
-        $accounts = Account::where('is_active', true)->orderBy('code')->get();
+        $accounts = $this->accounts->activeOrdered();
         $voucherNo = JournalEntry::generateVoucherNo('journal');
         return view('journals.create', compact('accounts', 'voucherNo'));
     }
@@ -43,7 +52,7 @@ class JournalEntryController extends Controller
         }
 
         DB::transaction(function () use ($validated, $totalDebit) {
-            $entry = JournalEntry::create([
+            $entry = $this->journals->create([
                 'voucher_no' => JournalEntry::generateVoucherNo($validated['voucher_type']),
                 'date' => $validated['date'],
                 'narration' => $validated['narration'],
@@ -73,7 +82,7 @@ class JournalEntryController extends Controller
 
     public function destroy(JournalEntry $journal)
     {
-        $journal->delete();
+        $this->journals->delete($journal);
         return redirect()->route('journals.index')->with('success', 'Journal entry deleted successfully.');
     }
 }

@@ -2,29 +2,43 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Branch;
-use App\Models\Customer;
-use App\Models\Invoice;
-use App\Models\Product;
 use App\Models\Quotation;
-use App\Models\TaxRate;
+use App\Repositories\Contracts\BranchRepositoryInterface;
+use App\Repositories\Contracts\CustomerRepositoryInterface;
+use App\Repositories\Contracts\InvoiceRepositoryInterface;
+use App\Repositories\Contracts\ProductRepositoryInterface;
+use App\Repositories\Contracts\QuotationRepositoryInterface;
+use App\Repositories\Contracts\TaxRateRepositoryInterface;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class QuotationController extends Controller
 {
+    public function __construct(
+        private QuotationRepositoryInterface $quotations,
+        private InvoiceRepositoryInterface $invoices,
+        private CustomerRepositoryInterface $customers,
+        private ProductRepositoryInterface $products,
+        private BranchRepositoryInterface $branches,
+        private TaxRateRepositoryInterface $taxRates,
+    ) {}
+
     public function index()
     {
-        $quotations = Quotation::with('customer', 'branch')->latest('date')->get();
+        $quotations = $this->quotations->query()
+            ->with('customer', 'branch')
+            ->latest('date')
+            ->get();
         return view('quotations.index', compact('quotations'));
     }
 
     public function create()
     {
-        $customers = Customer::where('is_active', true)->orderBy('name')->get();
-        $products = Product::where('is_active', true)->orderBy('name')->get();
-        $branches = Branch::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
-        $taxRates = TaxRate::where('is_active', true)->orderBy('name')->get();
+        $customers = $this->customers->active();
+        $products = $this->products->active();
+        $branches = $this->branches->activeOrdered();
+        $taxRates = $this->taxRates->active();
         $quotationNo = Quotation::generateQuotationNo();
 
         return view('quotations.create', compact('customers', 'products', 'branches', 'taxRates', 'quotationNo'));
@@ -60,7 +74,7 @@ class QuotationController extends Controller
             $discount = $validated['discount'] ?? 0;
             $total = $subtotal + $tax - $discount;
 
-            $quotation = Quotation::create([
+            $quotation = $this->quotations->create([
                 'quotation_no' => Quotation::generateQuotationNo(),
                 'date' => $validated['date'],
                 'valid_until' => $validated['valid_until'] ?? null,
@@ -104,7 +118,7 @@ class QuotationController extends Controller
             return back()->with('error', 'Cannot delete a quotation that has been converted to an invoice.');
         }
 
-        $quotation->delete();
+        $this->quotations->delete($quotation);
         return redirect()->route('quotations.index')->with('success', 'Quotation deleted successfully.');
     }
 
@@ -118,7 +132,7 @@ class QuotationController extends Controller
             return back()->with('error', 'Cannot change status of a converted quotation.');
         }
 
-        $quotation->update(['status' => $validated['status']]);
+        $this->quotations->update($quotation, ['status' => $validated['status']]);
         return back()->with('success', 'Status updated successfully.');
     }
 
@@ -131,7 +145,7 @@ class QuotationController extends Controller
         $quotation->load('items');
 
         $invoice = DB::transaction(function () use ($quotation) {
-            $invoice = Invoice::create([
+            $invoice = $this->invoices->create([
                 'invoice_no' => Invoice::generateInvoiceNo('sales'),
                 'type' => 'sales',
                 'date' => now(),
@@ -160,7 +174,7 @@ class QuotationController extends Controller
                 ]);
             }
 
-            $quotation->update([
+            $this->quotations->update($quotation, [
                 'status' => 'converted',
                 'converted_invoice_id' => $invoice->id,
             ]);
